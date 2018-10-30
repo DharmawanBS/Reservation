@@ -1,4 +1,3 @@
-import Reservation from './Reservation';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
@@ -22,9 +21,12 @@ import MailIcon from '@material-ui/icons/Mail';
 import Badge from '@material-ui/core/Badge';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import {Route} from 'react-router-dom';
-import Dashboard from './Dashboard';
 import Grid from '@material-ui/core/Grid';
+import {Route} from 'react-router-dom';
+
+import Dashboard from './Dashboard';
+import Reservation from './Reservation';
+import ScheduleCalendar from './ScheduleCalendar';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -203,7 +205,7 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+            {['ScheduleCalendar', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
               <ListItem button key={text} onClick={()=>{this._toReservation(text)}}>
                 <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
                 <ListItemText primary={text} />
@@ -225,6 +227,7 @@ class App extends Component {
           <Grid container alignItems='center' justify='center'>
             <Route exact path='/' component={Dashboard}/>
             <Route exact path='/reservation' component={Reservation}/>
+            <Route exact path='/ScheduleCalendar' component={ScheduleCalendar}/>
           </Grid>
         </main>
       </div>
