@@ -1,39 +1,31 @@
-let express = require('express');
-let path = require('path');
-let cookieParser = require('cookie-parser');
-let logger = require('morgan');
+const express = require('express');
+const logger = require('morgan');
+const config = require('./core/config');
+const jwt = require('jsonwebtoken');
 
-//  API Auth
-let login = require('./auth/login');
-
-//  default output
-let empty = require('./output/empty');
-let created = require('./output/created');
-let updated = require('./output/updated');
-let something_error = require('./output/something_error');
-let invalid = require('./output/invalid');
-let failed = require('./output/failed');
-let not_found = require('./output/not_found');
-let unauthorized = require('./output/unauthorized');
-
-let app = express();
+const app = express();
 
 app.use(logger('dev'));
+
+const router = express.Router();
+app.use('/api', router);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/login', login);
+//  API Auth
+app.use('/login', require('./auth/login'));
+app.use('/profil', require('./auth/profil'));
 
-app.use('/empty', empty);
-app.use('/created', created);
-app.use('/updated', updated);
-app.use('/something_error', something_error);
-app.use('/invalid', invalid);
-app.use('/failed', failed);
-app.use('/not_found', not_found);
-app.use('/unauthorized', unauthorized);
+//  default output
+app.use('/empty', require('./output/empty'));
+app.use('/created', require('./output/created'));
+app.use('/updated', require('./output/updated'));
+app.use('/something_error', require('./output/something_error'));
+app.use('/invalid', require('./output/invalid'));
+app.use('/failed', require('./output/failed'));
+app.use('/not_found', require('./output/not_found'));
+app.use('/unauthorized', require('./output/unauthorized'));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
