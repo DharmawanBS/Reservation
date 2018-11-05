@@ -119,11 +119,11 @@ class App extends Component {
   //update Title every page
   componentWillUpdate(nextProps, nextState) {
     var path = nextProps.location.pathname;
-    if ( path === '/') {
+    if ( path === '/admin') {
       nextState.title = 'Dashboard';
     }
     else {
-      var title = path.replace('/','');
+      var title = path.replace('/admin/','');
       nextState.title = title.charAt(0).toUpperCase() + title.slice(1);
     }
     
@@ -138,11 +138,11 @@ class App extends Component {
   };
 
   _toReservation = (text) => {
-    this.props.history.push('/' + text);
+    this.props.history.replace('/admin/' + text);
   };
 
   _toHome = () => {
-    this.props.history.push('/');
+    this.props.history.push('/admin');
   };
 
   render() {
@@ -205,16 +205,7 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            {['ScheduleCalendar', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-              <ListItem button key={text} onClick={()=>{this._toReservation(text)}}>
-                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
-          </List>
-          <Divider />
-          <List>
-            {['All mail', 'Trash', 'Spam'].map((text, index) => (
+            {['Schedule'].map((text, index) => (
               <ListItem button key={text} onClick={()=>{this._toReservation(text)}}>
                 <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
                 <ListItemText primary={text} />
@@ -225,9 +216,9 @@ class App extends Component {
         <main className={classes.content} style={{marginLeft: this.state.open? 225:55}}>
           <div className={classes.toolbar} />
           <Grid container alignItems='center' justify='center'>
-            <Route exact path='/' component={Dashboard}/>
-            <Route exact path='/reservation' component={Reservation}/>
-            <Route exact path='/ScheduleCalendar' component={ScheduleCalendar}/>
+            <Route exact path='/admin' component={Dashboard}/>
+            <Route exact path='/admin/reservation' component={Reservation}/>
+            <Route exact path='/admin/Schedule' component={ScheduleCalendar}/>
           </Grid>
         </main>
       </div>

@@ -6,6 +6,8 @@ import {Route} from 'react-router-dom';
 
 import Check from './Check';
 import Available from './Available';
+import BookingDetail from './BookingDetail';
+import { Grid } from "@material-ui/core";
 
 var date = new Date();
 
@@ -70,11 +72,11 @@ class LandingPage extends Component {
   //update Title every page
   componentWillUpdate(nextProps, nextState) {
     var path = nextProps.location.pathname;
-    if ( path === '/') {
+    if ( path === '/user') {
       nextState.title = 'Book';
     }
     else {
-      var title = path.replace('/','');
+      var title = path.replace('/user/','');
       nextState.title = title.charAt(0).toUpperCase() + title.slice(1);
     }
     
@@ -103,10 +105,11 @@ class LandingPage extends Component {
             </Toolbar>
         </AppBar>
         </div>
-        <div style={{flex:1, position:'absolute', top:0, left:0, right:0, bottom:0}}>
-            <Route exact path='/' component={Check}></Route>
-            <Route exact path='/available' component={Available}></Route>
-        </div>
+        <Grid container style={{flex:1, position:'absolute', top:0, left:0, right:0, bottom:0}}>
+            <Route exact path='/user' component={Check}></Route>
+            <Route exact path='/user/available' component={Available}></Route>
+            <Route exact path='/user/booking detail' component={BookingDetail}></Route>
+        </Grid>
         </div>
       </div>
     );

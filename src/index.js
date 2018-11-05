@@ -4,11 +4,14 @@ import './index.css';
 import App from './App';
 import LandingPage from './LandingPage';
 import * as serviceWorker from './serviceWorker';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch} from 'react-router-dom';
 
 ReactDOM.render(
 <BrowserRouter>
-	<Route path = '/' component={LandingPage}/>
+	<Switch>
+		<Route path = '/user' component={LandingPage}/>
+		<Route path = '/admin' component={App}/>
+	</Switch>
 </BrowserRouter>
 , document.getElementById('root'));
 

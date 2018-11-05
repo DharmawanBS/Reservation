@@ -43,31 +43,30 @@ const styles = {
 };
 
 
-class Check extends Component {
+class BookingDetail extends Component {
     handleChange = name => event => {
         this.setState({
             [name]: event.target.value,
         });
     };
 
-    state = {};
+    state = {
+        dateNow : date
+    };
 
 	_handleSearch=()=>{
-		this.props.history.push('/user/available');
+		this.props.history.push('/available');
 	}
   render() {
     return (
-    <div>
-        <Grid container justify='center' alignItems='center' style={{height:'100%', padding:24}}>
-			<Typography variant="h3" component="h3" style={{flex:1, color:'#FFF', textAlign:'left', verticalAlign:'center', alignSelf:'center'}}>
-			LAYANAN SEWA BUS PARIWISATA JAKARTA TERBAIK DAN TEPERCAYA
-			</Typography>
+    <div style={{flex:1, height:'100%'}}>
+        <Grid container style={{flex:1, padding:16, height:'100%'}} justify='center' alignItems='center'>
             <Paper elevation={10} style={{
-				flex:1,
 				padding:16,
+                width:500,
                 textAlign:'center'}}>
                 <Typography variant="h5" component="h3">
-                    Book Now
+                    Booking Detail
                 </Typography>
                 <form>
                     <TextField
@@ -77,12 +76,13 @@ class Check extends Component {
                         style={[styles.textField, styles.dense]}
                         margin="dense"
                         variant="outlined"
+                        value="Nama tempat"
                     />
                     <TextField
 							id="start-date"
 							label="Tanggal Berangkat"
 							type="date"
-							defaultValue={this.state.dateNow}
+							defaultValue='2017-05-24'
 							style={styles.textField}
 							InputLabelProps={{
 							shrink: true,
@@ -93,7 +93,7 @@ class Check extends Component {
 							id="end-date"
 							label="Tanggal Kembali"
 							type="date"
-							defaultValue={this.state.dateNow}
+							defaultValue='2017-05-28'
 							style={styles.textField}
 							InputLabelProps={{
 							shrink: true,
@@ -107,12 +107,32 @@ class Check extends Component {
                         style={[styles.textField, styles.dense]}
                         margin="dense"
                         variant="outlined"
+                        value = '50'
+                    />
+                    <TextField
+                        id="location"
+                        label="Tipe Bus"
+                        fullWidth
+                        style={[styles.textField, styles.dense]}
+                        margin="dense"
+                        variant="outlined"
+                        value = 'Big Bus'
+                    />
+                    <TextField
+                        id="location"
+                        label="Estimasi Harga"
+                        fullWidth
+                        style={[styles.textField, styles.dense]}
+                        margin="dense"
+                        variant="outlined"
+                        value = 'Rp. xxx.xxx.xxx'
                     />
                     <div style={{textAlign:'right'}}>
-                        <Button size="large" variant='contained' color='primary' style={{marginTop:8, textAlign:'right'}}
-							onClick={()=>this._handleSearch()}
-						>
-                            Cari
+                        <Button size="large" variant='contained' color='secondary' style={{marginTop:8, textAlign:'right', marginRight:8}}>
+                            Ganti Bus
+                        </Button>
+                        <Button size="large" variant='contained' color='primary' style={{marginTop:8, textAlign:'right'}}>
+                            Pesan
                         </Button>
                     </div>
                 </form>
@@ -123,4 +143,4 @@ class Check extends Component {
   }
 }
 
-export default Check;
+export default BookingDetail;
