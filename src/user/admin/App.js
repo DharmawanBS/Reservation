@@ -10,21 +10,29 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
 import IconButton from '@material-ui/core/IconButton';
+import ListItem from '@material-ui/core/ListItem';
+import Badge from '@material-ui/core/Badge';
+import Grid from '@material-ui/core/Grid';
+import {Route} from 'react-router-dom';
+import Tooltip from '@material-ui/core/Tooltip';
+import Popper from '@material-ui/core/Popper';
+
+//icons
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import MailIcon from '@material-ui/icons/Mail';
-import Badge from '@material-ui/core/Badge';
+import Dashboard from '@material-ui/icons/Dashboard';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-import Grid from '@material-ui/core/Grid';
-import {Route} from 'react-router-dom';
+import InsertInvitation from '@material-ui/icons/InsertInvitation';
+import Create from '@material-ui/icons/Create';
+import Face from '@material-ui/icons/Face';
+import DirectionsBus from '@material-ui/icons/DirectionsBus';
 
-import Dashboard from './Dashboard';
+//routes
+import Dashboards from './Dashboard';
 import Reservation from './Reservation';
 import ScheduleCalendar from './ScheduleCalendar';
 
@@ -110,16 +118,18 @@ const styles = theme => ({
   },
 });
 
+
 class App extends Component {
   state = {
     open: false,
-    title: 'Dashboard'
+    title: 'Dashboard',
+    popper : false
   };
 
   //update Title every page
   componentWillUpdate(nextProps, nextState) {
     var path = nextProps.location.pathname;
-    if ( path === '/admin') {
+    if ( path === '/admin/') {
       nextState.title = 'Dashboard';
     }
     else {
@@ -175,7 +185,7 @@ class App extends Component {
             </Typography>
             <div className={classes.grow} />
             <div className={classes.sectionDesktop}>
-              <IconButton color="inherit" onClick={this._toHome}>
+              <IconButton color="inherit">
                 <Badge badgeContent={17} color="secondary">
                   <NotificationsIcon />
                 </Badge>
@@ -183,7 +193,6 @@ class App extends Component {
               <IconButton
                 aria-owns={isMenuOpen ? 'material-appbar' : null}
                 aria-haspopup="true"
-                onClick={()=>this._toReservation('reservation')}
                 color="inherit"
               >
                 <AccountCircle />
@@ -205,20 +214,44 @@ class App extends Component {
           </div>
           <Divider />
           <List>
-            {['Schedule'].map((text, index) => (
-              <ListItem button key={text} onClick={()=>{this._toReservation(text)}}>
-                <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon>
-                <ListItemText primary={text} />
-              </ListItem>
-            ))}
+              <Tooltip title='Dashboard' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'admin'} onClick={()=>{this._toReservation('')}}>
+                  <ListItemIcon><Dashboard /></ListItemIcon>
+                  <ListItemText primary={'Dashboard'} />
+                </ListItem>
+              </Tooltip>
+              <Tooltip title='New Reservation' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'reservation'} onClick={()=>{this._toReservation('reservation')}}>
+                  <ListItemIcon><Create /></ListItemIcon>
+                  <ListItemText primary={'New Reservation'} />
+                </ListItem>
+              </Tooltip>
+              <Tooltip title='Schedules' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'schedule'} onClick={()=>{this._toReservation('schedules')}}>
+                  <ListItemIcon><InsertInvitation /></ListItemIcon>
+                  <ListItemText primary={'Schedules'} />
+                </ListItem>
+              </Tooltip>
+              <Tooltip title='Manage Users' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'users'} onClick={()=>{this._toReservation('users')}}>
+                  <ListItemIcon><Face /></ListItemIcon>
+                  <ListItemText primary={'Manage Users'} />
+                </ListItem>
+              </Tooltip>
+              <Tooltip title='Manage Vehicles' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'vehicles'} onClick={()=>{this._toReservation('vehicles')}}>
+                  <ListItemIcon><DirectionsBus /></ListItemIcon>
+                  <ListItemText primary={'Manage Vehicles'} />
+                </ListItem>
+              </Tooltip>
           </List>
         </Drawer>
         <main className={classes.content} style={{marginLeft: this.state.open? 225:55}}>
           <div className={classes.toolbar} />
           <Grid container alignItems='center' justify='center'>
-            <Route exact path='/admin' component={Dashboard}/>
+            <Route exact path='/admin' component={Dashboards}/>
             <Route exact path='/admin/reservation' component={Reservation}/>
-            <Route exact path='/admin/Schedule' component={ScheduleCalendar}/>
+            <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
           </Grid>
         </main>
       </div>

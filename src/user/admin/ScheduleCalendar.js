@@ -4,6 +4,7 @@ import moment from "moment";
 import BigCalendar from 'react-big-calendar'
 import "../../App.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { Grid, Paper } from "@material-ui/core";
 
 const localizer = Calendar.momentLocalizer(moment);
 const events = [
@@ -61,15 +62,17 @@ class App extends Component {
 
   render() {
     return (
-      <div style={{width:'100%'}}>
-        <Calendar
-          localizer={localizer}
-          defaultDate={new Date()}
-          defaultView="month"
-          events={this.state.events}
-          style={{ height: "100vh" }}
-        />
-      </div>
+      <Grid justify='center' alignItems='center' style={{flex:1}}>
+        <Paper style={{margin:8, padding:16}}>
+          <Calendar
+            localizer={localizer}
+            defaultDate={new Date()}
+            defaultView="month"
+            events={this.state.events}
+            style={{ height: "80vh" }}
+          />
+        </Paper>
+      </Grid>
     );
   }
 }

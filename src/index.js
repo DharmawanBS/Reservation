@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import App from './user/admin/App';
+import Login from './Login';
 import LandingPage from './user/non_admin/LandingPage';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter, Route, Switch} from 'react-router-dom';
@@ -11,6 +12,7 @@ ReactDOM.render(
 	<Switch>
 		<Route path = '/user' component={LandingPage}/>
 		<Route path = '/admin' component={App}/>
+		<Route exact path = '/' component={Login}/>
 	</Switch>
 </BrowserRouter>
 , document.getElementById('root'));
