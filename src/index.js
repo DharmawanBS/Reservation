@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import LandingPage from './LandingPage';
+import App from './user/admin/App';
+import LandingPage from './user/non_admin/LandingPage';
 import * as serviceWorker from './serviceWorker';
 import { BrowserRouter, Route, Switch} from 'react-router-dom';
 

@@ -2,9 +2,8 @@ import React, { Component } from "react";
 import Calendar from "react-big-calendar";
 import moment from "moment";
 import BigCalendar from 'react-big-calendar'
-import "./App.css";
+import "../../App.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import logo from "./logo.svg";
 
 const localizer = Calendar.momentLocalizer(moment);
 const events = [
