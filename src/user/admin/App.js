@@ -34,6 +34,7 @@ import DirectionsBus from '@material-ui/icons/DirectionsBus';
 import Dashboards from './Dashboard';
 import Reservation from './Reservation';
 import ScheduleCalendar from './ScheduleCalendar';
+import Vehicle from './Vehicles';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -251,6 +252,7 @@ class App extends Component {
             <Route exact path='/admin' component={Dashboards}/>
             <Route exact path='/admin/reservation' component={Reservation}/>
             <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
+            <Route exact path='/admin/vehicles' component={Vehicle}/>
           </Grid>
         </main>
       </div>
