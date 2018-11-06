@@ -15,7 +15,6 @@ import Badge from '@material-ui/core/Badge';
 import Grid from '@material-ui/core/Grid';
 import {Route} from 'react-router-dom';
 import Tooltip from '@material-ui/core/Tooltip';
-import Popper from '@material-ui/core/Popper';
 
 //icons
 import MenuIcon from '@material-ui/icons/Menu';
@@ -129,7 +128,7 @@ class App extends Component {
   //update Title every page
   componentWillUpdate(nextProps, nextState) {
     var path = nextProps.location.pathname;
-    if ( path === '/admin/') {
+    if ( path === '/admin/' || path === '/admin') {
       nextState.title = 'Dashboard';
     }
     else {
