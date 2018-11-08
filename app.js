@@ -17,6 +17,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/login', require('./auth/login'));
 app.use('/profil', require('./auth/profil'));
 
+//  API Control
+app.use('/user_view', require('./control/user_view'));
+app.use('/user_insert', require('./control/user_insert'));
+app.use('/vehicle_view', require('./control/vehicle_view'));
+
 //  default output
 app.use('/empty', require('./output/empty'));
 app.use('/created', require('./output/created'));

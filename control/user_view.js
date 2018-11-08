@@ -7,13 +7,13 @@ router.get('/', function(req, res, next) {
         rows => {
             if (rows != null) {
 
-                let query = "select user.*,user_type.user_type_name from user,user_type where user.user_type_id = user_type.user_type_id and user.user_id = " + rows.id;
+                let query = "select * from view_user";
                 main.getDB().run(query).then(
                     rows => {
                         if (rows.length > 0) {
                             return main.output(res,200,main.msg_ok,rows);
                         }
-                        else return res.redirect('/unauthorized');
+                        else return res.redirect('/empty');
                     }
                 ).catch( err => {
                     return res.redirect('/something_error');
@@ -22,6 +22,7 @@ router.get('/', function(req, res, next) {
             else return res.redirect('/unauthorized');
         }
     ).catch( err => {
+        //console.log(err);
         return res.redirect('/unauthorized');
     });
 });

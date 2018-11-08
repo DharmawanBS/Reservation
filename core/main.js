@@ -28,6 +28,10 @@ function Main() {
     this.msg_invalid = 'invalid';
     this.msg_unauthorized = 'unauthorized';
     this.msg_something_error = 'something error';
+
+    this.default_type = 'text';
+    this.default_show = true;
+    this.default_nullable = true;
 }
 
 Main.prototype.getRouter = function() {
@@ -42,8 +46,27 @@ Main.prototype.getJWT = function() {
     return this.jwt;
 };
 
-Main.prototype.isEmpty = function(item) {
-    return (item === '' || item == null);
+Main.prototype.inputCheck = function(res,item, is_bool = false, is_number = false, is_string = false, is_object = false) {
+    if (item === '' || item == null) {
+        return null;
+    }
+    if (is_bool) {
+        if (typeof item === 'boolean') return item;
+        else return null;
+    }
+    if (is_number) {
+        if (typeof item === 'number') return item;
+        else return null;
+    }
+    if (is_string) {
+        if (typeof item === 'string') return item;
+        else return null;
+    }
+    if (is_object) {
+        if (typeof item === 'object') return item;
+        else return null;
+    }
+    return item;
 };
 
 Main.prototype.getConfig = function() {
@@ -73,7 +96,7 @@ Main.prototype.output = function (res,code,msg,data) {
     if (msg == null) msg = this.msg_ok;
     if (code == null) code = 200;
     res.statusCode = code;
-    res.json({ msg: msg,data:data });
+    return res.json({ msg: msg,data:data });
 };
 
 module.exports = Main;

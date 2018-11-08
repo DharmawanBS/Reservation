@@ -6,23 +6,26 @@ router.get('/', function(req, res, next) {
     main.auth(req).then(
         rows => {
             if (rows != null) {
+                console.log(rows.id);
 
-                let query = "select user.*,user_type.user_type_name from user,user_type where user.user_type_id = user_type.user_type_id and user.user_id = " + rows.id;
+                let query = "select * from view_vehicle";
                 main.getDB().run(query).then(
                     rows => {
                         if (rows.length > 0) {
-                            return main.output(res,200,main.msg_ok,rows);
+                            main.output(res,200,main.msg_ok,rows);
                         }
-                        else return res.redirect('/unauthorized');
+                        else res.redirect('/unauthorized');
                     }
                 ).catch( err => {
-                    return res.redirect('/something_error');
+                    //console.log(err);
+                    res.redirect('/something_error');
                 });
             }
-            else return res.redirect('/unauthorized');
+            else res.redirect('/unauthorized');
         }
     ).catch( err => {
-        return res.redirect('/unauthorized');
+        //console.log(err);
+        res.redirect('/unauthorized');
     });
 });
 
