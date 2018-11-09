@@ -1,10 +1,26 @@
 import React, { Component } from "react";
-import { Grid, Paper, Typography, ExpansionPanel, ExpansionPanelSummary, ExpansionPanelDetails, Button, GridList, GridListTile, GridListTileBar, IconButton, TextField } from "@material-ui/core";
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
+import Button from '@material-ui/core/Button';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import IconButton from '@material-ui/core/IconButton';
+import TextField from '@material-ui/core/TextField';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Dialog from '@material-ui/core/Dialog';
+
+//icons
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/DeleteOutline';
 import EditIcon from '@material-ui/icons/Edit';
 import DoneIcon from '@material-ui/icons/Done';
+import NewVehicle from "./NewVehicle";
 
 const tileData = [
     {
@@ -73,7 +89,8 @@ class Vehicle extends Component {
         "- cool box <br />",
         "- crew yg berpengalaman <br />",
         "- helper yg ramah <br />"
-      ]
+      ],
+      dialog : false
   };
 
   handleChange = panel => (event, expanded) => {
@@ -81,6 +98,21 @@ class Vehicle extends Component {
       expanded: expanded ? panel : false,
     });
   };
+
+  _handleTextFieldChange =(e,id)=> {
+    let arr = [...this.state.spec];
+    arr[id] = e.target.value;
+    this.setState({
+        spec: arr
+    }, ()=>{console.log('TEST ' + this.state.spec)}
+    );
+  }
+
+  _handleCloseDialog=()=>{
+    this.setState({
+      dialog:false
+    })
+  }
 
   render() {
       const {expanded} = this.state;
@@ -133,20 +165,24 @@ class Vehicle extends Component {
                       - helper yg ramah <br />
                   </Typography>
                   :
-                  this.state.spec.map((item)=>(
+                  <Grid>
+                  {this.state.spec.map((item, id)=>(
                     <TextField
                       id="outlined-name"
                       value={item}
-                      onChange={this.handleChange('name')}
                       margin="normal"
                       variant="outlined"
+                      onChange={(e)=>this._handleTextFieldChange(e,id)}
                       style={{width:'100%'}}
-                      onSubmit={()=>{
-                        this.state.spec.push("")
-                          this.setState({spec:this.state.spec})
-                      }}
                     />
-                  ))
+                  ))}
+                  <Button onClick={()=>{
+                    this.state.spec.push("")
+                    this.setState({spec:this.state.spec})
+                  }}>
+                    Add new
+                  </Button> 
+                  </Grid>
                 }
                 </Grid>
                 <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24}}>
@@ -160,12 +196,14 @@ class Vehicle extends Component {
               <Grid style={{textAlign:'right'}}>
                 {
                   this.state.edit?
-                  <Button variant='outlined' color='primary' onClick={()=>this.setState({edit:false})}>
+                  <Button variant='outlined' color='primary' onClick={()=>{this.setState({edit:false})}}>
                     SAVE
                     <DoneIcon style={{fontSize:15, marginLeft:8}}/>
                   </Button>
                   :
-                  <Button variant='outlined' onClick={()=>this.setState({edit:true})}>
+                  <Button variant='outlined' onClick={()=>{
+                    this.setState({edit:true})
+                    }}>
                     EDIT
                     <EditIcon style={{fontSize:15, marginLeft:8}}/>
                   </Button>
@@ -187,9 +225,15 @@ class Vehicle extends Component {
           </ExpansionPanelDetails>
         </ExpansionPanel>
         </Paper>
-        <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}}>
+        <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}} onClick={()=>this.setState({dialog:true})}>
             <AddIcon />
         </Button>
+        <Dialog open={this.state.dialog} onClose={()=>this.setState({dialog : false})}>
+          <Grid style={{padding:16}}>
+            <DialogTitle>New Vehicle</DialogTitle>
+            <NewVehicle closeDialog={this._handleCloseDialog.bind(this)}/>
+          </Grid>
+        </Dialog>
     </Grid>
     );
   }
