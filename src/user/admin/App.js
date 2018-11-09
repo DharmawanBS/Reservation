@@ -29,12 +29,14 @@ import InsertInvitation from '@material-ui/icons/InsertInvitation';
 import Create from '@material-ui/icons/Create';
 import Face from '@material-ui/icons/Face';
 import DirectionsBus from '@material-ui/icons/DirectionsBus';
+import Receipt from '@material-ui/icons/Receipt'
 
 //routes
 import Dashboards from './Dashboard';
 import Reservation from './Reservation';
 import ScheduleCalendar from './ScheduleCalendar';
 import User from './User';
+import Order from './Order';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -232,6 +234,12 @@ class App extends Component {
                   <ListItemText primary={'Schedules'} />
                 </ListItem>
               </Tooltip>
+              <Tooltip title='Order Detail' placement='right' disableHoverListener={this.state.open}>
+                <ListItem button key={'orders'} onClick={()=>{this._toReservation('orders')}}>
+                  <ListItemIcon><Receipt /></ListItemIcon>
+                  <ListItemText primary={'Order Detail'} />
+                </ListItem>
+              </Tooltip>
               <Tooltip title='Manage Users' placement='right' disableHoverListener={this.state.open}>
                 <ListItem button key={'users'} onClick={()=>{this._toReservation('users')}}>
                   <ListItemIcon><Face /></ListItemIcon>
@@ -253,6 +261,7 @@ class App extends Component {
             <Route exact path='/admin/reservation' component={Reservation}/>
             <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
             <Route exact path='/admin/Users' component={User}/>
+            <Route exact path='/admin/Orders' component={Order}/>
           </Grid>
         </main>
       </div>
