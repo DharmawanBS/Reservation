@@ -1,3 +1,4 @@
+//core
 import React, { Component } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -6,10 +7,14 @@ import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Button from '@material-ui/core/Button';
+
+//icons
 import SaveIcon from '@material-ui/icons/Save';
 
+//var
 var date = new Date();
 
+//const
 const styles = {
 	root: {
 		padding: 8,
@@ -77,6 +82,7 @@ const bus_types = [
 	},
 ];
 
+//class
 class Reservation extends Component {
 	handleChangeTextbox = name => event => {
 		this.setState({
@@ -85,9 +91,9 @@ class Reservation extends Component {
 	  };
 
 	handleChange = name => event => {
-	this.setState({
-		[name]: event.target.value,
-	});
+		this.setState({
+			[name]: event.target.value,
+		});
 	};
 	state = {
 		type: '',
