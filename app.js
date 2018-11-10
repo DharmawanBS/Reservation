@@ -22,6 +22,12 @@ app.use('/user_view', require('./control/user_view'));
 app.use('/user_insert', require('./control/user_insert'));
 app.use('/vehicle_view', require('./control/vehicle_view'));
 
+//  API Usertype
+app.use('/usertype_insert', require('./ueer_type/usertype_insert'));
+app.use('/usertype_view', require('./ueer_type/usertype_view'));
+app.use('/usertype_delete', require('./ueer_type/usertype_delete'));
+app.use('/usertype_update', require('./ueer_type/usertype_update'));
+
 //  default output
 app.use('/empty', require('./output/empty'));
 app.use('/created', require('./output/created'));
