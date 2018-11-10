@@ -157,5 +157,8 @@ typings/
 # Serverless directories
 .serverless
 
+# jangan ke upload
+package.json
+core/database.js
 
 # End of https://www.gitignore.io/api/node,intellij+all
