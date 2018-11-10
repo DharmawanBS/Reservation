@@ -6,21 +6,17 @@ router.post('/', function(req, res, next) {
     main.auth(req).then(
         rows => {
             if (rows != null) {
+                let user_type_id = main.inputCheck(res,req.body.user_type_id,false,false,true,false);
 
-                let view_user = main.inputCheck(res,req.body.view_user,false,false,false,true);
-
-                let query = "insert into user_type set ?";
-                let args = {
-                    user_type_name: view_user,
-
+                if (user_type_id === null){
+                    return res.redirect('/invalid');
                 }
+
+                let query = "update user_type set user_type_is_active = 0 where user_type_id = " + user_type_id;
 
                 main.getDB().run(query).then(
                     rows => {
- /*                       if (rows.length > 0) {
-                            return main.output(res,200,main.msg_ok,rows);
-                        }
-                        else return res.redirect('/empty'); **/
+                        return res.redirect('/updated');
                     }
                 ).catch( err => {
                     return res.redirect('/something_error');
