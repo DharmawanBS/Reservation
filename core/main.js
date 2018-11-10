@@ -46,7 +46,22 @@ Main.prototype.getJWT = function() {
     return this.jwt;
 };
 
-Main.prototype.inputCheck = function(res,item, is_bool = false, is_number = false, is_string = false, is_object = false) {
+Main.prototype.getCurrentDate = function() {
+    let date = new Date();
+    return date.getYear() + 1900
+        + '-'
+        + ((date.getMonth() + 1 < 10) ? '0' + (date.getMonth() + 1) : date.getMonth() + 1)
+        + '-'
+        + date.getDate()
+        + ' '
+        + date.getHours()
+        + ':'
+        + ((date.getMinutes() < 10) ? '0' + (date.getMinutes()) : date.getMinutes())
+        + ':'
+        + ((date.getSeconds() < 10) ? '0' + (date.getSeconds()) : date.getSeconds());
+};
+
+Main.prototype.inputCheck = function(res,item, is_bool = false, is_number = false, is_string = false, is_object = false, is_data_type = false) {
     if (item === '' || item == null) {
         return null;
     }
@@ -65,6 +80,16 @@ Main.prototype.inputCheck = function(res,item, is_bool = false, is_number = fals
     if (is_object) {
         if (typeof item === 'object') return item;
         else return null;
+    }
+    if (is_data_type) {
+        switch(item) {
+            case 'text':
+                return item;
+            case 'int':
+                return item;
+            default:
+                return null;
+        }
     }
     return item;
 };
