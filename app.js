@@ -17,10 +17,15 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/login', require('./auth/login'));
 app.use('/profil', require('./auth/profil'));
 
-//  API Control
+//  API Control User
 app.use('/user_view', require('./control/user_view'));
 app.use('/user_insert', require('./control/user_insert'));
+app.use('/user_delete', require('./control/user_delete'));
+
+//  API Control Vehicle
 app.use('/vehicle_view', require('./control/vehicle_view'));
+app.use('/vehicle_insert', require('./control/vehicle_insert'));
+app.use('/vehicle_delete', require('./control/vehicle_delete'));
 
 //  API Usertype
 app.use('/usertype_insert', require('./ueer_type/usertype_insert'));
