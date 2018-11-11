@@ -15,13 +15,18 @@ import Badge from '@material-ui/core/Badge';
 import Grid from '@material-ui/core/Grid';
 import {Route} from 'react-router-dom';
 import Tooltip from '@material-ui/core/Tooltip';
+import Popper from '@material-ui/core/Popper';
+import Fade from '@material-ui/core/Fade';
+import Paper from '@material-ui/core/Paper';
+import MenuList from '@material-ui/core/MenuList';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
 
 //icons
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import Dashboard from '@material-ui/icons/Dashboard';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import NotificationsIcon from '@material-ui/icons/Notifications';
@@ -30,13 +35,15 @@ import Create from '@material-ui/icons/Create';
 import Face from '@material-ui/icons/Face';
 import DirectionsBus from '@material-ui/icons/DirectionsBus';
 import Receipt from '@material-ui/icons/Receipt'
-
+import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 //routes
 import Dashboards from './Dashboard';
 import Reservation from './Reservation';
 import ScheduleCalendar from './ScheduleCalendar';
 import User from './User';
 import Order from './Order';
+import Vehicle from './Vehicles';
+import EditUserForm from './EditUserForm';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -125,7 +132,8 @@ class App extends Component {
   state = {
     open: false,
     title: 'Dashboard',
-    popper : false
+    popper : false,
+    openProfile : false
   };
 
   //update Title every page
@@ -156,6 +164,14 @@ class App extends Component {
   _toHome = () => {
     this.props.history.push('/admin');
   };
+
+  _profileClick=(event)=>{
+    const { currentTarget } = event;
+    this.setState(state => ({
+      anchorEl: currentTarget,
+      openProfile: !state.openProfile,
+    }));
+  }
 
   render() {
     const { classes, theme } = this.props;
@@ -196,9 +212,37 @@ class App extends Component {
                 aria-owns={isMenuOpen ? 'material-appbar' : null}
                 aria-haspopup="true"
                 color="inherit"
+                onClick={(event)=>this._profileClick(event)}
               >
                 <AccountCircle />
               </IconButton>
+              <Popper
+                style={{zIndex:99999}}
+               id={'popper'}
+               open={this.state.openProfile}
+               anchorEl={this.state.anchorEl}
+               transition>
+                {({ TransitionProps }) => (
+                  <Fade {...TransitionProps}>
+                    <Paper>
+                    <MenuList>
+                      <MenuItem className={classes.menuItem}>
+                        <ListItemIcon className={classes.icon}>
+                          <AccountCircle />
+                        </ListItemIcon>
+                        <ListItemText classes={{ primary: classes.primary }} inset primary="My Profile" />
+                      </MenuItem>
+                      <MenuItem className={classes.menuItem}>
+                        <ListItemIcon className={classes.icon}>
+                          <PowerSettingsNewIcon />
+                        </ListItemIcon>
+                        <ListItemText classes={{ primary: classes.primary }} inset primary="Log Out" />
+                      </MenuItem>
+                    </MenuList>
+                    </Paper>
+                  </Fade>
+                )}
+              </Popper>
             </div>
           </Toolbar>
         </AppBar>
@@ -261,7 +305,9 @@ class App extends Component {
             <Route exact path='/admin/reservation' component={Reservation}/>
             <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
             <Route exact path='/admin/Users' component={User}/>
+            <Route exact path='/admin/vehicles' component={Vehicle}/>
             <Route exact path='/admin/Orders' component={Order}/>
+            <Route exact path='/admin/editformuser' component={EditUserForm}/>
           </Grid>
         </main>
       </div>
