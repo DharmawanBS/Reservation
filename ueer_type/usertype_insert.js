@@ -15,9 +15,9 @@ router.post('/', function(req, res, next) {
                 let query = "insert into user_type set ?";
                 let args = {
                     user_type_name: user_type_name,
-                    user_type_lastmodified: user_type_lastmodified,
+                    user_type_lastmodified: main.getCurrentDate(),
                     user_type_lastmodified_id: rows.id,
-                    user_type_created: user_type_created,
+                    user_type_created: main.getCurrentDate(),
                     user_type_created_id: rows.id
                 };
 
