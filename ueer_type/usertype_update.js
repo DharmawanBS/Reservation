@@ -20,14 +20,14 @@ router.post('/', function(req, res, next) {
                         return res.redirect('/updated');
                     }
                 ).catch( err => {
-                    console.log(err);
+                    //console.log(err);
                     return res.redirect('/something_error');
                 });
             }
             else return res.redirect('/unauthorized');
         }
     ).catch( err => {
-        console.log(err);
+        //console.log(err);
         return res.redirect('/unauthorized');
     });
 });
