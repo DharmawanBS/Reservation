@@ -22,6 +22,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -29,7 +30,10 @@ import { withStyles } from '@material-ui/core/styles';
 //icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import SaveIcon from '@material-ui/icons/Save'
+import SaveIcon from '@material-ui/icons/Save';
+import AddIcon from '@material-ui/icons/Add';
+import BlockIcon from '@material-ui/icons/Block';
+import ClearIcon from '@material-ui/icons/Clear';
 
 let num = 0;
 function createData(idnum, name, address, total, last_resv) {
@@ -169,7 +173,18 @@ const styles = theme => ({
 	},
 	dense: {
 		marginTop: theme.spacing.unit,
-	},
+  },
+  addButtonBottom: {
+    position: 'fixed',
+    bottom: '1vh',
+    right: '2vw'
+  },
+  divRoot: {
+    paddingBottom: '5vh',
+  },
+  button: {
+    marginRight: theme.spacing.unit,
+  }
 });
 
 class User extends Component {
@@ -191,6 +206,7 @@ class User extends Component {
     dialogData: [],
     openDelete: false,
     edit: false,
+    openAdd: false,
   };
 
   handleRequestSort = (event, property) => {
@@ -235,6 +251,14 @@ class User extends Component {
   handleCloseDelete = () => {
     this.setState({ openDelete: false, edit: false });
   };
+
+  handleOpenAdd = () => {
+    this.setState({ openAdd: true});
+  }
+
+  handleCloseAdd = () => {
+    this.setState({ openAdd: false});
+  }
  
   render() {
     const { classes } = this.props;
@@ -242,186 +266,262 @@ class User extends Component {
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
     return (
-      <Paper className={classes.root}>
-        <EnhancedTableToolbar/>
-        <div className={classes.tableWrapper}>
-          <Table className={classes.table} aria-labelledby="tableTitle">
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={this.handleRequestSort}
-            />
-            <TableBody>
-              {stableSort(data, getSorting(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map(n => {
-                  return (
-                    <TableRow
-                      hover
-                      key={n.id}
-                      padding= 'default'
-                      onClick={this.handleClickOpen('paper',n)}
-                    >
-                      <TableCell component="th" scope="row" padding="default">
-                        {n.num}
-                      </TableCell>
-                      <TableCell>{n.idnum}</TableCell>
-                      <TableCell>{n.name}</TableCell>
-                      <TableCell>{n.address}</TableCell>
-                      <TableCell>{n.total}</TableCell>
-                      <TableCell>{n.last_resv}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-        <TablePagination
-          component="div"
-          count={data.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          backIconButtonProps={{
-            'aria-label': 'Previous Page',
-          }}
-          nextIconButtonProps={{
-            'aria-label': 'Next Page',
-          }}
-          onChangePage={this.handleChangePage}
-          onChangeRowsPerPage={this.handleChangeRowsPerPage}
-        />
-        <Dialog
-          open={this.state.open}
-          onClose={this.handleClose}
-          scroll={this.state.scroll}
-          aria-labelledby="scroll-dialog-title"
-        >
-          <DialogTitle id="scroll-dialog-title">User Data</DialogTitle>
-          <DialogContent style={{minWidth: '30vw'}}>
-            <DialogContentText>
+      <Grid className={classes.divRoot} xl={12} xs={12} sm={12} md={12} lg={12}>
+        <Paper className={classes.root}>
+          <EnhancedTableToolbar/>
+          <div className={classes.tableWrapper}>
+            <Table className={classes.table} aria-labelledby="tableTitle">
+              <EnhancedTableHead
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={this.handleRequestSort}
+              />
+              <TableBody>
+                {stableSort(data, getSorting(order, orderBy))
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map(n => {
+                    return (
+                      <TableRow
+                        hover
+                        key={n.id}
+                        padding= 'default'
+                        onClick={this.handleClickOpen('paper',n)}
+                      >
+                        <TableCell component="th" scope="row" padding="default">
+                          {n.num}
+                        </TableCell>
+                        <TableCell>{n.idnum}</TableCell>
+                        <TableCell>{n.name}</TableCell>
+                        <TableCell>{n.address}</TableCell>
+                        <TableCell>{n.total}</TableCell>
+                        <TableCell>{n.last_resv}</TableCell>
+                      </TableRow>
+                    );
+                  })}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 49 * emptyRows }}>
+                    <TableCell colSpan={6} />
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+          <TablePagination
+            component="div"
+            count={data.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            backIconButtonProps={{
+              'aria-label': 'Previous Page',
+            }}
+            nextIconButtonProps={{
+              'aria-label': 'Next Page',
+            }}
+            onChangePage={this.handleChangePage}
+            onChangeRowsPerPage={this.handleChangeRowsPerPage}
+          />
+          <Dialog
+            open={this.state.open}
+            onClose={this.handleClose}
+            scroll={this.state.scroll}
+            aria-labelledby="scroll-dialog-title"
+          >
+            <DialogTitle id="scroll-dialog-title">User Data</DialogTitle>
+            <DialogContent style={{minWidth: '30vw'}}>
+              <DialogContentText>
+                {
+                  ! this.state.edit ? (
+                    <List>
+                      <ListItem>
+                        <ListItemText primary="ID Number" secondary={this.state.dialogData.idnum} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Name" secondary={this.state.dialogData.name} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Address" secondary={this.state.dialogData.address} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Total" secondary={this.state.dialogData.total} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Last Reservation" secondary={this.state.dialogData.last_resv} />
+                      </ListItem>
+                    </List>
+                  ) : (
+                    <form>
+                      <TextField
+                      id="client-idnum"
+                      label="Client ID Number"
+                      value={this.state.dialogData.idnum}
+                      fullWidth
+                      className={[classes.textField, classes.dense]}
+                      margin="dense"
+                      variant="outlined"
+                      />
+                      <TextField
+                        id="client-name"
+                        label="Client Full Name"
+                        value={this.state.dialogData.name}
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="client-address"
+                        label="Client Address"
+                        value={this.state.dialogData.address}
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="client-email"
+                        label="Client Email"
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="client-phoneNum"
+                        label="Client Phone Number"
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                    </form>
+                  )
+                }
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
               {
                 ! this.state.edit ? (
-                  <List>
-                    <ListItem>
-                      <ListItemText primary="ID Number" secondary={this.state.dialogData.idnum} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Name" secondary={this.state.dialogData.name} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Address" secondary={this.state.dialogData.address} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Total" secondary={this.state.dialogData.total} />
-                    </ListItem>
-                    <ListItem>
-                      <ListItemText primary="Last Reservation" secondary={this.state.dialogData.last_resv} />
-                    </ListItem>
-                  </List>
+                  <div>
+                    <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
+                      Deactivate
+                      <BlockIcon className={classes.rightIcon}/>
+                    </Button>
+                    <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
+                      Edit
+                      <CreateIcon className={classes.rightIcon}/>
+                    </Button>
+                    <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
+                      Delete
+                      <DeleteIcon className={classes.rightIcon} />
+                    </Button>
+                  </div>
                 ) : (
-                  <form>
-                    <TextField
-                    id="client-idnum"
-                    label="Client ID Number"
-                    value={this.state.dialogData.idnum}
+                  <div>
+                    <Button variant="contained" color="primary" onClick={this.handleClose} className={classes.button}>
+                      Save
+                      <SaveIcon style={styles.rightIcon} />
+                    </Button>
+                    <Button onClick={this.handleClickCancel} color="secondary" variant="contained" className={classes.button}>
+                      Cancel
+                      <ClearIcon style={styles.rightIcon} />
+                    </Button>
+                  </div>
+                )
+              }
+            </DialogActions>
+          </Dialog>
+          <Dialog
+            open={this.state.openDelete}
+            onClose={this.handleCloseDelete}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Are you sure you want to delete user {this.state.dialogData.name} ?</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                Deleting this user means you can not access this user's data anymore.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleCloseDelete} color="primary" className={classes.button}>
+                Disagree
+              </Button>
+              <Button onClick={this.handleCloseDelete} color="primary" className={classes.button}>
+                Agree
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <Dialog
+            open={this.state.openAdd}
+            onClose={this.handleCloseAdd}
+            scroll={this.state.scroll}
+            aria-labelledby="scroll-dialog-title"
+          >
+            <DialogTitle id="scroll-dialog-title">Create New User</DialogTitle>
+            <DialogContent style={{minWidth: '30vw'}}>
+              <DialogContentText>
+                <form>
+                  <TextField
+                  id="client-idnum"
+                  label="Client ID Number"
+                  fullWidth
+                  className={[classes.textField, classes.dense]}
+                  margin="dense"
+                  variant="outlined"
+                  />
+                  <TextField
+                    id="client-name"
+                    label="Client Full Name"
                     fullWidth
                     className={[classes.textField, classes.dense]}
                     margin="dense"
                     variant="outlined"
-                    />
-                    <TextField
-                      id="client-name"
-                      label="Client Full Name"
-                      value={this.state.dialogData.name}
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
-                    />
-                    <TextField
-                      id="client-address"
-                      label="Client Address"
-                      value={this.state.dialogData.address}
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
-                    />
-                    <TextField
-                      id="client-email"
-                      label="Client Email"
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
-                    />
-                    <TextField
-                      id="client-phoneNum"
-                      label="Client Phone Number"
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
-                    />
-                    <div style={{textAlign: 'right'}}>
-                      <Button variant="contained" color="primary" style={styles.button} onClick={this.handleClose}>
-                        <SaveIcon style={styles.leftIcon} />
-                        Save
-                      </Button>
-                    </div>
-                  </form>
-                )
-              }
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            {
-              ! this.state.edit ? (
-                <div>
-                  <Button onClick={this.handleEdit} color="primary" variant="contained">
-                    Edit
-                    <CreateIcon className={classes.rightIcon}/>
-                  </Button>
-                  <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained">
-                    Delete
-                    <DeleteIcon className={classes.rightIcon} />
-                  </Button>
-                </div>
-              ) : (
-                <Button onClick={this.handleClickCancel} color="secondary" variant="contained">
-                  Cancel
-                </Button>
-              )
-            }
-          </DialogActions>
-        </Dialog>
-        <Dialog
-          open={this.state.openDelete}
-          onClose={this.handleCloseDelete}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">Are you sure you want to delete user {this.state.dialogData.name} ?</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Deleting this user means you can not access this user's data anymore.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleCloseDelete} color="primary">
-              Disagree
+                  />
+                  <TextField
+                    id="client-address"
+                    label="Client Address"
+                    fullWidth
+                    className={[classes.textField, classes.dense]}
+                    margin="dense"
+                    variant="outlined"
+                  />
+                  <TextField
+                    id="client-email"
+                    label="Client Email"
+                    fullWidth
+                    className={[classes.textField, classes.dense]}
+                    margin="dense"
+                    variant="outlined"
+                  />
+                  <TextField
+                    id="client-phoneNum"
+                    label="Client Phone Number"
+                    fullWidth
+                    className={[classes.textField, classes.dense]}
+                    margin="dense"
+                    variant="outlined"
+                  />
+                </form>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button variant="contained" color="primary" onClick={this.handleCloseAdd} className={classes.button}>
+                Save
+                <SaveIcon style={styles.rightIcon} />
+              </Button>
+              <Button onClick={this.handleCloseAdd} color="secondary" variant="contained" className={classes.button}>
+                Cancel
+                <ClearIcon style={styles.rightIcon} />
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <div>
+            <Button variant="fab" color="primary" aria-label="Add" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
+              <AddIcon />
             </Button>
-            <Button onClick={this.handleCloseDelete} color="primary">
-              Agree
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Paper>
+          </div>
+        </Paper>
+      </Grid>
     );
   }
 }
