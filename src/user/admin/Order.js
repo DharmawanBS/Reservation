@@ -32,12 +32,13 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
 import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
+import BlockIcon from '@material-ui/icons/Block';
 import ClearIcon from '@material-ui/icons/Clear';
 
 let num = 0;
-function createData(idnum, name, address, total, last_resv) {
+function createData(idnum, name, start_date, end_date, price) {
     num += 1;
-    return { num, idnum, name, address, total, last_resv };
+    return { num, idnum, name, start_date, end_date, price };
 }
 
 function desc(a, b, orderBy) {
@@ -66,11 +67,11 @@ function getSorting(order, orderBy) {
 
 const rows = [
     { id: 'num', numeric: false, disablePadding: false, label: '#' },
-    { id: 'idnum', numeric: false, disablePadding: false, label: 'ID Number' },
-    { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'address', numeric: false, disablePadding: false, label: 'Address' },
-    { id: 'total', numeric: false, disablePadding: false, label: 'Total' },
-    { id: 'last_resv', numeric: false, disablePadding: false, label: 'Last Reservation' },
+    { id: 'idnum', numeric: false, disablePadding: false, label: 'ID Reservation' },
+    { id: 'name', numeric: false, disablePadding: false, label: 'Client Name' },
+    { id: 'start_date', numeric: false, disablePadding: false, label: 'Start Date' },
+    { id: 'end_date', numeric: false, disablePadding: false, label: 'End Date' },
+    { id: 'price', numeric: false, disablePadding: false, label: 'Price' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -191,12 +192,12 @@ class Order extends Component {
     order: 'asc',
     orderBy: 'num',
     data: [
-        createData('123456789', 'Adi Lalala', 'Jl. Mawar 1 Jakarta Pusat', 3, '05/06/2018'),
-        createData('112233445', 'Boni Yeyeye', 'Jl. Melati 2 Jakarta Barat', 1, '25/05/2018'),
-        createData('789456723', 'Citra Lololo', 'Jl. Kamboja 3 Jakarta Selatan', 2, '14/10/2018'),
-        createData('145683582', 'Deni Hahahaha', 'Jl. Sepatu 4 Jakarta Utara', 1, '09/03/2018'),
-        createData('673825146', 'Eka Yoyoyo', 'Jl. Tulip 5 Jakarta Timur', 4, '01/09/2018'),
-        createData('673941674', 'Feni Yayaya', 'Jl. Cemara 6 Bekasi', 1, '01/10/2018'),
+        createData('123456789', 'Adi Lalala', '05/06/2018', '07/06/2018', 5000000),
+        createData('112233445', 'Boni Yeyeye', '25/05/2018', '27/05/2018', 5000000),
+        createData('789456723', 'Citra Lololo', '14/10/2018', '14/10/2018', 2500000),
+        createData('145683582', 'Deni Hahahaha', '05/03/2018', '09/03/2018', 10000000),
+        createData('673825146', 'Eka Yoyoyo', '01/09/2018', '01/09/2018', 2500000),
+        createData('673941674', 'Feni Yayaya', '30/09/2018', '01/10/2018', 5000000),
     ],
     page: 0,
     rowsPerPage: 5,
@@ -251,17 +252,13 @@ class Order extends Component {
     this.setState({ openDelete: false, edit: false });
   };
 
-  handleOpenAdd = () => {
-    this.setState({ openAdd: true});
+  handleOpenAdd = (text) => {
+    this.props.history.replace('/admin/' + text);
   }
 
-  handleCloseAdd = () => {
-    this.setState({ openAdd: false});
-  }
- 
   render() {
     const { classes } = this.props;
-    const { data, order, orderBy, selected, rowsPerPage, page } = this.state;
+    const { data, order, orderBy, rowsPerPage, page } = this.state;
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, data.length - page * rowsPerPage);
 
     return (
@@ -291,9 +288,9 @@ class Order extends Component {
                         </TableCell>
                         <TableCell>{n.idnum}</TableCell>
                         <TableCell>{n.name}</TableCell>
-                        <TableCell>{n.address}</TableCell>
-                        <TableCell>{n.total}</TableCell>
-                        <TableCell>{n.last_resv}</TableCell>
+                        <TableCell>{n.start_date}</TableCell>
+                        <TableCell>{n.end_date}</TableCell>
+                        <TableCell>{n.price}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -325,33 +322,33 @@ class Order extends Component {
             scroll={this.state.scroll}
             aria-labelledby="scroll-dialog-title"
           >
-            <DialogTitle id="scroll-dialog-title">Order Data</DialogTitle>
+            <DialogTitle id="scroll-dialog-title">Reservation Data</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
                 {
                   ! this.state.edit ? (
                     <List>
                       <ListItem>
-                        <ListItemText primary="ID Number" secondary={this.state.dialogData.idnum} />
+                        <ListItemText primary="ID Reservation" secondary={this.state.dialogData.idnum} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Name" secondary={this.state.dialogData.name} />
+                        <ListItemText primary="Client Name" secondary={this.state.dialogData.name} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Address" secondary={this.state.dialogData.address} />
+                        <ListItemText primary="Start Date" secondary={this.state.dialogData.start_date} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Total" secondary={this.state.dialogData.total} />
+                        <ListItemText primary="End Date" secondary={this.state.dialogData.end_date} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Last Reservation" secondary={this.state.dialogData.last_resv} />
+                        <ListItemText primary="Price" secondary={this.state.dialogData.price} />
                       </ListItem>
                     </List>
                   ) : (
                     <form>
                       <TextField
                       id="client-idnum"
-                      label="Client ID Number"
+                      label="ID Reservation"
                       value={this.state.dialogData.idnum}
                       fullWidth
                       className={[classes.textField, classes.dense]}
@@ -369,8 +366,19 @@ class Order extends Component {
                       />
                       <TextField
                         id="client-address"
-                        label="Client Address"
-                        value={this.state.dialogData.address}
+                        label="Start Date"
+                        type="datetime-local"
+                        value={this.state.dialogData.start_date}
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="client-address"
+                        label="End Date"
+                        type="datetime-local"
+                        value={this.state.dialogData.end_date}
                         fullWidth
                         className={[classes.textField, classes.dense]}
                         margin="dense"
@@ -378,15 +386,7 @@ class Order extends Component {
                       />
                       <TextField
                         id="client-email"
-                        label="Client Email"
-                        fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
-                        variant="outlined"
-                      />
-                      <TextField
-                        id="client-phoneNum"
-                        label="Client Phone Number"
+                        label="Vehicle"
                         fullWidth
                         className={[classes.textField, classes.dense]}
                         margin="dense"
@@ -402,6 +402,10 @@ class Order extends Component {
                 ! this.state.edit ? (
                   <div>
                     <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
+                      Deactivate
+                      <BlockIcon className={classes.rightIcon}/>
+                    </Button>
+                    <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
                       Edit
                       <CreateIcon className={classes.rightIcon}/>
                     </Button>
@@ -414,7 +418,7 @@ class Order extends Component {
                   <div>
                     <Button variant="contained" color="primary" onClick={this.handleClose} className={classes.button}>
                       Save
-                      <SaveIcon style={styles.rigthIcon} />
+                      <SaveIcon style={styles.rightIcon} />
                     </Button>
                     <Button onClick={this.handleClickCancel} color="secondary" variant="contained" className={classes.button}>
                       Cancel
@@ -446,72 +450,8 @@ class Order extends Component {
               </Button>
             </DialogActions>
           </Dialog>
-          <Dialog
-            open={this.state.openAdd}
-            onClose={this.handleCloseAdd}
-            scroll={this.state.scroll}
-            aria-labelledby="scroll-dialog-title"
-          >
-            <DialogTitle id="scroll-dialog-title">Create New Order</DialogTitle>
-            <DialogContent style={{minWidth: '30vw'}}>
-              <DialogContentText>
-                <form>
-                  <TextField
-                  id="client-idnum"
-                  label="Client ID Number"
-                  fullWidth
-                  className={[classes.textField, classes.dense]}
-                  margin="dense"
-                  variant="outlined"
-                  />
-                  <TextField
-                    id="client-name"
-                    label="Client Full Name"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                  <TextField
-                    id="client-address"
-                    label="Client Address"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                  <TextField
-                    id="client-email"
-                    label="Client Email"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                  <TextField
-                    id="client-phoneNum"
-                    label="Client Phone Number"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                </form>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button variant="contained" color="primary" onClick={this.handleCloseAdd} className={classes.button}>
-                Save
-                <SaveIcon style={styles.rightIcon} />
-              </Button>
-              <Button onClick={this.handleCloseAdd} color="secondary" variant="contained" className={classes.button}>
-                Cancel
-                <ClearIcon style={styles.rightIcon} />
-              </Button>
-            </DialogActions>
-          </Dialog>
           <div>
-            <Button variant="fab" color="primary" aria-label="Add" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
+            <Button variant="fab" color="primary" aria-label="Add" className={classes.addButtonBottom} onClick={()=>{this.handleOpenAdd('reservation')}}>
               <AddIcon />
             </Button>
           </div>
