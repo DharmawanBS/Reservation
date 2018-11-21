@@ -13,6 +13,9 @@ import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 
 //icons
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -90,7 +93,8 @@ class Vehicle extends Component {
         "- crew yg berpengalaman <br />",
         "- helper yg ramah <br />"
       ],
-      dialog : false
+      dialog : false,
+      dialogDelete : false
   };
 
   handleChange = panel => (event, expanded) => {
@@ -110,8 +114,18 @@ class Vehicle extends Component {
 
   _handleCloseDialog=()=>{
     this.setState({
-      dialog:false
+      dialog:false,
     })
+  }
+
+  _handleCloseDialogDelete=()=>{
+    this.setState({
+      dialogDelete:false,
+    })
+  }
+
+  _handleOpenDialogDelete=()=>{
+    this.setState({dialogDelete:true})
   }
 
   render() {
@@ -194,6 +208,31 @@ class Vehicle extends Component {
                 </Grid>
               </Grid>
               <Grid style={{textAlign:'right'}}>
+                <Button variant='contained' color='secondary'
+                onClick={()=>this._handleOpenDialogDelete()}
+                style={{marginRight:16}}>
+                    Delete
+                    <EditIcon style={{fontSize:15, marginLeft:8}}/>
+                  </Button>
+                  <Dialog
+                      open={this.state.dialogDelete}
+                      onClose={()=>this._handleCloseDialogDelete()}
+                    >
+                      <DialogTitle id="alert-dialog-title">{"Delete this vehicle data?"}</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                        Deleting this data means you can not access this vehicle's data anymore..
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={()=>this._handleCloseDialogDelete()} color="primary">
+                          Disagree
+                        </Button>
+                        <Button onClick={()=>this._handleCloseDialogDelete()} color="primary" autoFocus>
+                          Agree
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
                 {
                   this.state.edit?
                   <Button variant='outlined' color='primary' onClick={()=>{this.setState({edit:false})}}>
@@ -219,10 +258,10 @@ class Vehicle extends Component {
           </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Typography>
-              Nulla facilisi. Phasellus sollicitudin nulla et quam mattis feugiat. Aliquam eget
-              maximus est, id dignissim quam.
+              Nulla facilisi. Phasellusm quam.
             </Typography>
-          </ExpansionPanelDetails>
+          </ExpansionPanelDetails> sollicitudin nulla et quam mattis feugiat. Aliquam eget
+              maximus est, id dignissi
         </ExpansionPanel>
         </Paper>
         <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}} onClick={()=>this.setState({dialog:true})}>
