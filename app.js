@@ -36,7 +36,7 @@ app.use('/usertype_update', require('./user_type/usertype_update'));
 //  API Vehicle
 app.use('/vehicle_insert', require('./vehicle/vehicle_insert'));
 // app.use('/vehicle_view', require('./vehicle/vehicle_view'));
-// app.use('/vehicle_delete', require('./vehicle/vehicle_delete'));
+app.use('/vehicle_delete', require('./vehicle/vehicle_delete'));
 // app.use('/vehicle_update', require('./vehicle/vehicle_update'));
 
 //  default output
