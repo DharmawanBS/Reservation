@@ -39,6 +39,12 @@ app.use('/vehicle_view', require('./vehicle/vehicle_view'));
 app.use('/vehicle_delete', require('./vehicle/vehicle_delete'));
 app.use('/vehicle_update', require('./vehicle/vehicle_update'));
 
+//  API Reservation
+app.use('/reservation_insert', require('./reservation/reservation_insert'));
+app.use('/reservation_approval', require('./reservation/reservation_approval'));
+app.use('/reservation_view', require('./reservation/reservation_view'));
+app.use('/reservation_done', require('./reservation/reservation_done'));
+
 //  default output
 app.use('/empty', require('./output/empty'));
 app.use('/created', require('./output/created'));

@@ -12,7 +12,7 @@ router.post('/', function(req, res, next) {
                     return res.redirect('/invalid');
                 }
 
-                let query = "update user_type set user_type_is_active = 0 where user_type_id = " + user_type_id;
+                let query = "update user_type set user_type_is_active = 0 where user_type_is_active = 1 and user_type_id = " + user_type_id;
 
                 main.getDB().run(query).then(
                     rows => {

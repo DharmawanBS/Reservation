@@ -6,19 +6,20 @@ router.post('/', function(req, res, next) {
     main.auth(req).then(
         rows => {
             if (rows != null) {
-                let vehicle_id = main.inputCheck(res,req.body.vehicle_id,false,false,true,false);
+                let reservation_id = main.inputCheck(res,req.body.reservation_id,false,true,false,false);
 
-                if (vehicle_id === null){
+                if (reservation_id === null){
                     return res.redirect('/invalid');
                 }
 
-                let query = "update vehicle set vehicle_is_active = 0 where vehicle_is_active = 1 and vehicle_id = " + vehicle_id;
+                let query = "update reservation set reservation_is_approved = 1, reservation_approved_datetime = '" + main.getCurrentDate() + "', reservation_approved_id = " + rows.id + " where reservation_is_active = 1 and reservation_id = " + reservation_id;
 
                 main.getDB().run(query).then(
                     rows => {
                         return res.redirect('/updated');
                     }
                 ).catch( err => {
+                    //console.log(err);
                     return res.redirect('/something_error');
                 });
             }
