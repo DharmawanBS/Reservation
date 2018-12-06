@@ -12,7 +12,8 @@ router.post('/', function(req, res, next) {
     main.getDB().run(query).then(
         rows => {
             if (rows.length > 0) {
-                const payload = {
+                const payload =
+                    {
                     id: rows[0].user_id,
                     type: rows[0].user_type_id
                 };

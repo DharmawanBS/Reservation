@@ -17,15 +17,18 @@ app.use(express.urlencoded({ extended: false }));
 app.use('/login', require('./auth/login'));
 app.use('/profil', require('./auth/profil'));
 
+//  API User
+app.use('/register', require('./user/register'));
+
 //  API Control User
-app.use('/user_view', require('./control/user_view'));
-app.use('/user_insert', require('./control/user_insert'));
-app.use('/user_delete', require('./control/user_delete'));
+app.use('/user_view', require('./dinamic/user_view'));
+app.use('/user_insert', require('./dinamic/user_insert'));
+app.use('/user_delete', require('./dinamic/user_delete'));
 
 //  API Control Vehicle
-app.use('/vehicle_view', require('./control/vehicle_view'));
-app.use('/vehicle_insert', require('./control/vehicle_insert'));
-app.use('/vehicle_delete', require('./control/vehicle_delete'));
+app.use('/vehicle_view', require('./dinamic/vehicle_view'));
+app.use('/vehicle_insert', require('./dinamic/vehicle_insert'));
+app.use('/vehicle_delete', require('./dinamic/vehicle_delete'));
 
 //  API Usertype
 app.use('/usertype_insert', require('./ueer_type/usertype_insert'));
