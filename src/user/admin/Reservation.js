@@ -102,8 +102,28 @@ class Reservation extends Component {
 		dateNow: date,
 		busType: '',
 		price: '',
-		notes: ''
+		notes: '',
+		name : ''
 	};
+
+	handleSave = () =>{
+		this.setState({
+			name : this['client_name'].value,
+			type : this['client_type'].value,
+			phone : this['client_phone'].value,
+			destination : this['client_destination'].value,
+			pickup : this['client_pick_up'].value,
+			start : this['client_start_date'].value,
+			finish : this['client_finish_date'].value,
+			bus_type : this['client_bus_type'].value,
+			notes : this['client_notes'].value,
+		},(()=>{window.alert(this.state.type + ' ' + this.state.finish + ' ' + this.state.start)}));
+		
+	}
+
+	_emptyChecker=()=>{
+		var empty = false;
+	}
 
 	render() {
 		//const { classes } = props;
@@ -113,7 +133,7 @@ class Reservation extends Component {
 					<Typography variant="h4" gutterBottom style={styles.title}>New Reservation</Typography>
 					<form>
 						<TextField
-							id="client-name"
+							inputRef = {(input) => this['client_name'] = input}
 							label="Client Name"
 							fullWidth
 							style={[styles.textField, styles.dense]}
@@ -121,7 +141,7 @@ class Reservation extends Component {
 							variant="outlined"
 						/>
 						<TextField
-							id="client-type"
+							inputRef = {(input) => this['client_type'] = input}
 							select
 							label="Client Type"
 							style={styles.textField}
@@ -143,7 +163,7 @@ class Reservation extends Component {
 							))}
 						</TextField>
 						<TextField
-							id="phone"
+							inputRef = {(input) => this['client_phone'] = input}
 							label="Phone"
 							fullWidth
 							style={[styles.textField, styles.dense]}
@@ -151,31 +171,27 @@ class Reservation extends Component {
 							variant="outlined"
 						/>
 						<TextField
-							id="destination"
+							inputRef = {(input) => this['client_destination'] = input}
 							label="Destination"
 							multiline
 							rowsMax="4"
-							value={this.state.destination}
-							onChange={this.handleChangeTextbox('destination')}
 							style={styles.textField}
 							margin="normal"
 							variant="outlined"
 							fullWidth
 						/>
 						<TextField
-							id="pickup-loc"
+							inputRef = {(input) => this['client_pick_up'] = input}
 							label="Pick Up Location"
 							multiline
 							rowsMax="4"
-							value={this.state.pickup}
-							onChange={this.handleChangeTextbox('pickup')}
 							style={styles.textField}
 							margin="normal"
 							variant="outlined"
 							fullWidth
 						/>
 						<TextField
-							id="start-date"
+							inputRef = {(input) => this['client_start_date'] = input}
 							label="Starting Date"
 							type="datetime-local"
 							defaultValue={this.state.dateNow}
@@ -186,7 +202,7 @@ class Reservation extends Component {
 							fullWidth
 						/>
 						<TextField
-							id="end-date"
+							inputRef = {(input) => this['client_finish_date'] = input}
 							label="End Date"
 							type="datetime-local"
 							defaultValue={this.state.dateNow}
@@ -197,7 +213,7 @@ class Reservation extends Component {
 							fullWidth
 						/>
 						<TextField
-							id="bus-type"
+							inputRef = {(input) => this['client_bus_type'] = input}
 							select
 							label="Bus Type"
 							style={styles.textField}
@@ -219,19 +235,17 @@ class Reservation extends Component {
 							))}
 						</TextField>
 						<TextField
-							id="notes"
+							inputRef = {(input) => this['client_notes'] = input}
 							label="Notes"
 							multiline
 							rowsMax="4"
-							value={this.state.pickup}
-							onChange={this.handleChangeTextbox('notes')}
 							style={styles.textField}
 							margin="normal"
 							variant="outlined"
 							fullWidth
 						/>
 						<TextField
-							id="price"
+							inputRef = {(input) => this['price'] = input}
 							style={[styles.dense, styles.textField]}
 							variant="outlined"
 							label="Price"
@@ -244,7 +258,7 @@ class Reservation extends Component {
 							type='Number'
 						/>
 						<div style={{textAlign: 'right'}}>
-							<Button variant="contained" color="primary" style={styles.button}>
+							<Button variant="contained" color="primary" style={styles.button} onClick={()=>this.handleSave()}>
 								<SaveIcon style={styles.leftIcon} />
 								Save
 							</Button>

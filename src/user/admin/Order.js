@@ -31,7 +31,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
 import SaveIcon from '@material-ui/icons/Save'
 
-let num = 0;
+var num = 0;
 function createData(idnum, name, address, total, last_resv) {
     num += 1;
     return { num, idnum, name, address, total, last_resv };

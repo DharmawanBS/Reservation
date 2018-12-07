@@ -13,7 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import ListItem from '@material-ui/core/ListItem';
 import Badge from '@material-ui/core/Badge';
 import Grid from '@material-ui/core/Grid';
-import {Route} from 'react-router-dom';
+import {Route, Redirect} from 'react-router-dom';
 import Tooltip from '@material-ui/core/Tooltip';
 import Popper from '@material-ui/core/Popper';
 import Fade from '@material-ui/core/Fade';
@@ -149,6 +149,10 @@ class App extends Component {
     
   }
 
+  componentDidMount(){
+    console.log("Checking auth");
+  }
+
   handleDrawerOpen = () => {
     this.setState({ open: true });
   };
@@ -158,11 +162,21 @@ class App extends Component {
   };
 
   _toReservation = (text) => {
-    this.props.history.replace('/admin/' + text);
+    this.props.history.replace({
+      pathname : '/admin/' + text,
+      state : {
+        user_id : this.props.location.state.user_id
+      }
+    });
   };
 
   _toHome = () => {
-    this.props.history.push('/admin');
+    this.props.history.push({
+      pathname : '/admin',
+      state : {
+        user_id : this.props.location.state.user_id
+      }
+    });
   };
 
   _profileClick=(event)=>{
@@ -178,140 +192,151 @@ class App extends Component {
     const { anchorEl } = this.state;
     const isMenuOpen = Boolean(anchorEl);
 
-    return (
-      <div className={classes.root}>
-        <CssBaseline />
-        <AppBar
-          position="fixed"
-          className={classNames(classes.appBar, {
-            [classes.appBarShift]: this.state.open,
-          })}
-        >
-          <Toolbar disableGutters={!this.state.open}>
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(classes.menuButton, {
-                [classes.hide]: this.state.open,
-              })}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" color="inherit" noWrap>
-              {this.state.title}
-            </Typography>
-            <div className={classes.grow} />
-            <div className={classes.sectionDesktop}>
-              <IconButton color="inherit">
-                <Badge badgeContent={17} color="secondary">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
+    if(this.props.location.state == null){
+      return(
+        <Redirect to={{
+          pathname : '/',
+          state : {
+            error : true
+          }
+        }}/>
+      );
+    }else{
+      return (
+        <div className={classes.root}>
+          <CssBaseline />
+          <AppBar
+            position="fixed"
+            className={classNames(classes.appBar, {
+              [classes.appBarShift]: this.state.open,
+            })}
+          >
+            <Toolbar disableGutters={!this.state.open}>
               <IconButton
-                aria-owns={isMenuOpen ? 'material-appbar' : null}
-                aria-haspopup="true"
                 color="inherit"
-                onClick={(event)=>this._profileClick(event)}
+                aria-label="Open drawer"
+                onClick={this.handleDrawerOpen}
+                className={classNames(classes.menuButton, {
+                  [classes.hide]: this.state.open,
+                })}
               >
-                <AccountCircle />
+                <MenuIcon />
               </IconButton>
-              <Popper
-                style={{zIndex:99999}}
-               id={'popper'}
-               open={this.state.openProfile}
-               anchorEl={this.state.anchorEl}
-               transition>
-                {({ TransitionProps }) => (
-                  <Fade {...TransitionProps}>
-                    <Paper>
-                    <MenuList>
-                      <MenuItem className={classes.menuItem}>
-                        <ListItemIcon className={classes.icon}>
-                          <AccountCircle />
-                        </ListItemIcon>
-                        <ListItemText classes={{ primary: classes.primary }} inset primary="My Profile" />
-                      </MenuItem>
-                      <MenuItem className={classes.menuItem}>
-                        <ListItemIcon className={classes.icon}>
-                          <PowerSettingsNewIcon />
-                        </ListItemIcon>
-                        <ListItemText classes={{ primary: classes.primary }} inset primary="Log Out" />
-                      </MenuItem>
-                    </MenuList>
-                    </Paper>
-                  </Fade>
-                )}
-              </Popper>
+              <Typography variant="h6" color="inherit" noWrap>
+                {this.state.title}
+              </Typography>
+              <div className={classes.grow} />
+              <div className={classes.sectionDesktop}>
+                <IconButton color="inherit">
+                  <Badge badgeContent={17} color="secondary">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+                <IconButton
+                  aria-owns={isMenuOpen ? 'material-appbar' : null}
+                  aria-haspopup="true"
+                  color="inherit"
+                  onClick={(event)=>this._profileClick(event)}
+                >
+                  <AccountCircle />
+                </IconButton>
+                <Popper
+                  style={{zIndex:99999}}
+                 id={'popper'}
+                 open={this.state.openProfile}
+                 anchorEl={this.state.anchorEl}
+                 transition>
+                  {({ TransitionProps }) => (
+                    <Fade {...TransitionProps}>
+                      <Paper>
+                      <MenuList>
+                        <MenuItem className={classes.menuItem}>
+                          <ListItemIcon className={classes.icon}>
+                            <AccountCircle />
+                          </ListItemIcon>
+                          <ListItemText classes={{ primary: classes.primary }} inset primary="My Profile" />
+                        </MenuItem>
+                        <MenuItem className={classes.menuItem}>
+                          <ListItemIcon className={classes.icon}>
+                            <PowerSettingsNewIcon />
+                          </ListItemIcon>
+                          <ListItemText classes={{ primary: classes.primary }} inset primary="Log Out" />
+                        </MenuItem>
+                      </MenuList>
+                      </Paper>
+                    </Fade>
+                  )}
+                </Popper>
+              </div>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
+            }}
+            open={this.state.open}
+          >
+            <div className={classes.toolbar}>
+              <IconButton onClick={this.handleDrawerClose}>
+                {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+              </IconButton>
             </div>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
-          }}
-          open={this.state.open}
-        >
-          <div className={classes.toolbar}>
-            <IconButton onClick={this.handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </div>
-          <Divider />
-          <List>
-              <Tooltip title='Dashboard' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'admin'} onClick={()=>{this._toReservation('')}}>
-                  <ListItemIcon><Dashboard /></ListItemIcon>
-                  <ListItemText primary={'Dashboard'} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title='New Reservation' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'reservation'} onClick={()=>{this._toReservation('reservation')}}>
-                  <ListItemIcon><Create /></ListItemIcon>
-                  <ListItemText primary={'New Reservation'} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title='Schedules' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'schedule'} onClick={()=>{this._toReservation('schedules')}}>
-                  <ListItemIcon><InsertInvitation /></ListItemIcon>
-                  <ListItemText primary={'Schedules'} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title='Order Detail' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'orders'} onClick={()=>{this._toReservation('orders')}}>
-                  <ListItemIcon><Receipt /></ListItemIcon>
-                  <ListItemText primary={'Order Detail'} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title='Manage Users' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'users'} onClick={()=>{this._toReservation('users')}}>
-                  <ListItemIcon><Face /></ListItemIcon>
-                  <ListItemText primary={'Manage Users'} />
-                </ListItem>
-              </Tooltip>
-              <Tooltip title='Manage Vehicles' placement='right' disableHoverListener={this.state.open}>
-                <ListItem button key={'vehicles'} onClick={()=>{this._toReservation('vehicles')}}>
-                  <ListItemIcon><DirectionsBus /></ListItemIcon>
-                  <ListItemText primary={'Manage Vehicles'} />
-                </ListItem>
-              </Tooltip>
-          </List>
-        </Drawer>
-        <main className={classes.content} style={{marginLeft: this.state.open? 225:55}}>
-          <div className={classes.toolbar} />
-          <Grid container alignItems='center' justify='center'>
-            <Route exact path='/admin' component={Dashboards}/>
-            <Route exact path='/admin/reservation' component={Reservation}/>
-            <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
-            <Route exact path='/admin/Users' component={User}/>
-            <Route exact path='/admin/vehicles' component={Vehicle}/>
-            <Route exact path='/admin/Orders' component={Order}/>
-            <Route exact path='/admin/editformuser' component={EditUserForm}/>
-          </Grid>
-        </main>
-      </div>
-    );
+            <Divider />
+            <List>
+                <Tooltip title='Dashboard' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'admin'} onClick={()=>{this._toReservation('')}}>
+                    <ListItemIcon><Dashboard /></ListItemIcon>
+                    <ListItemText primary={'Dashboard'} />
+                  </ListItem>
+                </Tooltip>
+                <Tooltip title='New Reservation' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'reservation'} onClick={()=>{this._toReservation('reservation')}}>
+                    <ListItemIcon><Create /></ListItemIcon>
+                    <ListItemText primary={'New Reservation'} />
+                  </ListItem>
+                </Tooltip>
+                <Tooltip title='Schedules' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'schedule'} onClick={()=>{this._toReservation('schedules')}}>
+                    <ListItemIcon><InsertInvitation /></ListItemIcon>
+                    <ListItemText primary={'Schedules'} />
+                  </ListItem>
+                </Tooltip>
+                <Tooltip title='Order Detail' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'orders'} onClick={()=>{this._toReservation('orders')}}>
+                    <ListItemIcon><Receipt /></ListItemIcon>
+                    <ListItemText primary={'Order Detail'} />
+                  </ListItem>
+                </Tooltip>
+                <Tooltip title='Manage Users' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'users'} onClick={()=>{this._toReservation('users')}}>
+                    <ListItemIcon><Face /></ListItemIcon>
+                    <ListItemText primary={'Manage Users'} />
+                  </ListItem>
+                </Tooltip>
+                <Tooltip title='Manage Vehicles' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'vehicles'} onClick={()=>{this._toReservation('vehicles')}}>
+                    <ListItemIcon><DirectionsBus /></ListItemIcon>
+                    <ListItemText primary={'Manage Vehicles'} />
+                  </ListItem>
+                </Tooltip>
+            </List>
+          </Drawer>
+          <main className={classes.content} style={{marginLeft: this.state.open? 225:55}}>
+            <div className={classes.toolbar} />
+            <Grid container alignItems='center' justify='center'>
+              <Route exact path='/admin' component={Dashboards}/>
+              <Route exact path='/admin/reservation' component={Reservation}/>
+              <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
+              <Route exact path='/admin/Users' component={User}/>
+              <Route exact path='/admin/vehicles' component={Vehicle}/>
+              <Route exact path='/admin/Orders' component={Order}/>
+              <Route exact path='/admin/editformuser' component={EditUserForm}/>
+            </Grid>
+          </main>
+        </div>
+      );
+    }
   }
 }
 

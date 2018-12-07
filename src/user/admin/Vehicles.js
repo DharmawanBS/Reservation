@@ -84,17 +84,19 @@ class Vehicle extends Component {
       edit : false,
       spec : [
         "- Jumlah kursi 59 seat",
-        "- Air Conditioner <br />",
-        "- Mic <br />",
-        "- TV <br />",
-        "- DVD <br />",
-        "- Karaoke <br />",
-        "- cool box <br />",
-        "- crew yg berpengalaman <br />",
-        "- helper yg ramah <br />"
+        "- Air Conditioner",
+        "- Mic",
+        "- TV",
+        "- DVD",
+        "- Karaoke",
+        "- cool box",
+        "- crew yg berpengalaman",
+        "- helper yg ramah"
       ],
       dialog : false,
-      dialogDelete : false
+      dialogDelete : false,
+      oldSpec : [],
+      price : '10000000'
   };
 
   handleChange = panel => (event, expanded) => {
@@ -108,8 +110,7 @@ class Vehicle extends Component {
     arr[id] = e.target.value;
     this.setState({
         spec: arr
-    }, ()=>{console.log('TEST ' + this.state.spec)}
-    );
+    });
   }
 
   _handleCloseDialog=()=>{
@@ -126,6 +127,39 @@ class Vehicle extends Component {
 
   _handleOpenDialogDelete=()=>{
     this.setState({dialogDelete:true})
+  }
+
+  _handleDeleteSpec=(ids)=>{
+    let arr = [...this.state.spec];
+    console.log(arr.splice(ids,1));
+    this.setState({
+      spec : arr
+    })
+    let len = arr.length;
+    for(let x=0; x<len; x++){
+      this['spec'+x].value = arr[x];
+    }
+    console.log(this.state.spec[ids] + ' ' + ids)
+  }
+
+  _handleEdit=()=>{
+    this.setState({
+      edit : true,
+      oldSpec : this.state.spec
+    })
+  }
+
+  _handleSave=()=>{
+    let len = this.state.spec.length;
+    var arr = []
+    for(let x=0; x<len; x++){
+      arr.push(this['spec'+x].value);
+    }
+    this.setState({
+      spec : arr,
+      edit : false
+    })
+    console.log(arr.toString());
   }
 
   render() {
@@ -161,34 +195,34 @@ class Vehicle extends Component {
                     ))}
                 </GridList>
                 <Grid style={{flex:0.5}}>
-                <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24}}>
+                <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginBottom:8}}>
                     Spesifikasi
                 </Typography>
-                <Grid style={{overflow:'auto', maxHeight:500}}>
+                <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
                 {
                   !this.state.edit?
-                    <Typography variant='subheading' id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:16, fontWeight:'normal'}}>
-                      - Jumlah kursi 59 seat <br />
-                      - Air Conditioner <br />
-                      - Mic <br />
-                      - TV <br />
-                      - DVD <br />
-                      - Karaoke <br />
-                      - cool box <br />
-                      - crew yg berpengalaman <br />
-                      - helper yg ramah <br />
-                  </Typography>
+                    this.state.spec.map((item,id)=>(
+                      <Grid container style={{textAlign:'left', flex:1, marginLeft:8,padding:8,fontWeight:'normal'}}>
+                      <Typography variant='subheading' style={{verticalAlign:'center'}}>
+                        {item}
+                      </Typography>
+                      </Grid>
+                    ))
                   :
                   <Grid>
                   {this.state.spec.map((item, id)=>(
+                    <Grid container>
                     <TextField
-                      id="outlined-name"
-                      value={item}
+                      inputRef={(input)=>{this['spec'+id] = input}}
+                      defaultValue={item}
                       margin="normal"
                       variant="outlined"
-                      onChange={(e)=>this._handleTextFieldChange(e,id)}
-                      style={{width:'100%'}}
+                      style={{flex:1}}
                     />
+                     <IconButton style={{flex:0.2}} onClick={()=>this._handleDeleteSpec(id)}>
+                        <DeleteIcon fontSize='12px'/>
+                      </IconButton>
+                    </Grid>
                   ))}
                   <Button onClick={()=>{
                     this.state.spec.push("")
@@ -199,20 +233,40 @@ class Vehicle extends Component {
                   </Grid>
                 }
                 </Grid>
-                <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24}}>
+                <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
                     Harga
                 </Typography>
-                <Typography variant="subtitle1" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:16}}>
-                    Rp. xxx.xxx.xxx / day
-                </Typography>
+                {
+                  this.state.edit?
+                    <Grid container style={{flex:1}} alignItems='center'>
+                    <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
+                      Rp.
+                    </Typography>
+                    <TextField
+                      id="harga"
+                      value={this.state.price}
+                      margin="normal"
+                      variant="outlined"
+                      onChange={(e)=>this.setState({price : e.target.value})}
+                      style={{flex:1}}
+                    />
+                    <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
+                      / day
+                    </Typography>
+                    </Grid>
+                    :
+                    <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
+                        Rp. {this.state.price} / day
+                    </Typography>
+                }
                 </Grid>
               </Grid>
-              <Grid style={{textAlign:'right'}}>
+              <Grid style={{textAlign:'right', marginTop:8}}>
                 <Button variant='contained' color='secondary'
                 onClick={()=>this._handleOpenDialogDelete()}
                 style={{marginRight:16}}>
                     Delete
-                    <EditIcon style={{fontSize:15, marginLeft:8}}/>
+                    <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
                   </Button>
                   <Dialog
                       open={this.state.dialogDelete}
@@ -235,17 +289,31 @@ class Vehicle extends Component {
                     </Dialog>
                 {
                   this.state.edit?
-                  <Button variant='outlined' color='primary' onClick={()=>{this.setState({edit:false})}}>
+                  <Button variant='outlined' color='primary' onClick={()=>{
+                    this._handleSave()
+                    }
+                  }>
                     SAVE
                     <DoneIcon style={{fontSize:15, marginLeft:8}}/>
                   </Button>
                   :
-                  <Button variant='outlined' onClick={()=>{
-                    this.setState({edit:true})
-                    }}>
+                  <Button variant='outlined' onClick={()=>this._handleEdit()}>
                     EDIT
                     <EditIcon style={{fontSize:15, marginLeft:8}}/>
                   </Button>
+                }
+                {
+                  this.state.edit?
+                  <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{
+                    this.setState({edit:false, spec:this.state.oldSpec})
+                    console.log('clicked')
+                    }
+                  }>
+                    CANCEL
+                    <DoneIcon style={{fontSize:15, marginLeft:8}}/>
+                  </Button>
+                  :
+                  null
                 }
               </Grid>
             </Grid>
