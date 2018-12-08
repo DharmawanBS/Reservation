@@ -7,6 +7,7 @@ import Button from '@material-ui/core/Button';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import IconButton from '@material-ui/core/IconButton';
+import Cookies from 'universal-cookie';
 
 //icons
 import CloseIcon from '@material-ui/icons/Close';
@@ -16,6 +17,9 @@ import InfoIcon from '@material-ui/icons/Info';
 import green from '@material-ui/core/colors/green';
 import amber from '@material-ui/core/colors/amber';
 import WarningIcon from '@material-ui/icons/Warning';
+
+
+const cookies = new Cookies();
 
 class Login extends Component {
   state = {
@@ -32,6 +36,11 @@ class Login extends Component {
       if(this.props.location.state !== null){
           this.setState({
               err : this.props.location.state
+          })
+      }
+      if(cookies.get('user_id', {path:'/'}) != null){
+          this.props.history.replace({
+              pathname : '/admin'
           })
       }
   }
@@ -76,6 +85,8 @@ class Login extends Component {
             console.log(JSON.stringify(responseJSON));
             if(responseJSON.msg.toLowerCase() === 'ok' && responseJSON.data != null){
                 this.setState({snack : true});
+                cookies.set('user_id',responseJSON.data.id,{path:'/'});
+                cookies.set('user_metadata',JSON.stringify(responseJSON.data.meta));
                 setTimeout(
                     ()=>{
                         this.props.history.replace({

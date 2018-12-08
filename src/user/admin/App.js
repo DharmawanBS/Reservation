@@ -22,6 +22,7 @@ import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import Cookies from 'universal-cookie';
 
 //icons
 import MenuIcon from '@material-ui/icons/Menu';
@@ -127,13 +128,15 @@ const styles = theme => ({
   },
 });
 
+const cookies = new Cookies();
 
 class App extends Component {
   state = {
     open: false,
     title: 'Dashboard',
     popper : false,
-    openProfile : false
+    openProfile : false,
+    user_id : null
   };
 
   //update Title every page
@@ -151,6 +154,10 @@ class App extends Component {
 
   componentDidMount(){
     console.log("Checking auth");
+    var user_id= cookies.get('user_id');
+    this.setState({
+      user_id : user_id
+    })
   }
 
   handleDrawerOpen = () => {
@@ -164,18 +171,12 @@ class App extends Component {
   _toReservation = (text) => {
     this.props.history.replace({
       pathname : '/admin/' + text,
-      state : {
-        user_id : this.props.location.state.user_id
-      }
     });
   };
 
   _toHome = () => {
     this.props.history.push({
       pathname : '/admin',
-      state : {
-        user_id : this.props.location.state.user_id
-      }
     });
   };
 
@@ -192,7 +193,7 @@ class App extends Component {
     const { anchorEl } = this.state;
     const isMenuOpen = Boolean(anchorEl);
 
-    if(this.props.location.state == null){
+    if(cookies.get('user_id') == null){
       return(
         <Redirect to={{
           pathname : '/',
