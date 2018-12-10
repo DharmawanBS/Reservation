@@ -43,7 +43,7 @@ class App extends Component {
     this.setState({
 			loading : true
 		})
-		fetch('http://api.jakartabusrent.com/index.php/reservasi/read',{
+		fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',

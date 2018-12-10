@@ -188,6 +188,13 @@ class App extends Component {
     }));
   }
 
+  _doLogOut=()=>{
+    cookies.remove('user_id',{path:'/'});
+    this.props.history.replace({
+      pathname : '/'
+    })
+  }
+
   render() {
     const { classes, theme } = this.props;
     const { anchorEl } = this.state;
@@ -257,7 +264,7 @@ class App extends Component {
                           </ListItemIcon>
                           <ListItemText classes={{ primary: classes.primary }} inset primary="My Profile" />
                         </MenuItem>
-                        <MenuItem className={classes.menuItem}>
+                        <MenuItem className={classes.menuItem} onClick={()=>{this._doLogOut()}}>
                           <ListItemIcon className={classes.icon}>
                             <PowerSettingsNewIcon />
                           </ListItemIcon>

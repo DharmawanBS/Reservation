@@ -81,7 +81,7 @@ export default class NewVehicle extends Component {
 
     _submitNewVehicle=()=>{
         this._closeDialog();
-        fetch('http://api.jakartabusrent.com/index.php/Vehicle/insert',{
+        fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/insert',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',

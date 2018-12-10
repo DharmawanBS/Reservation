@@ -99,7 +99,7 @@ class Vehicle extends Component {
   }
 
   fetchData=()=>{
-    fetch('http://api.jakartabusrent.com/index.php/Vehicle/read',{
+    fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
       method : 'POST'
     }).then(response => response.json())
     .then(responseJSON => {
@@ -207,6 +207,7 @@ class Vehicle extends Component {
     }
     var myData = [...this.state.data];
     myData[id].feature = arr;
+    myData[id].price = this['price'+id].value;
     var editor = [...this.state.edit];
     editor[id] = false;
     this.setState({
@@ -219,6 +220,7 @@ class Vehicle extends Component {
       new_format[element.key] = element.value
     });
     all.feature = new_format;
+    all.price = this['price'+id].value;
     console.log(all);
     fetch('http://api.jakartabusrent.com/index.php/Vehicle/update',{
       method : 'POST',
@@ -336,7 +338,7 @@ class Vehicle extends Component {
                     }
                     </Grid>
                     <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
-                        Harga
+                        Price
                     </Typography>
                     {
                       this.state.edit[id]?

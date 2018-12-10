@@ -174,7 +174,7 @@ class Reservation extends Component {
 		this.setState({
 			loading : true
 		})
-		fetch('http://api.jakartabusrent.com/index.php/reservasi/reservasi',{
+		fetch('http://www.api.jakartabusrent.com/index.php/reservasi/reservasi',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -205,7 +205,7 @@ class Reservation extends Component {
 	}
 
 	fetchData=()=>{
-		fetch('http://api.jakartabusrent.com/index.php/Vehicle/read',{
+		fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
 		  method : 'POST'
 		}).then(response => response.json())
 		.then(responseJSON => {
