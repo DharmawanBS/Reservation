@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Cookies from 'universal-cookie';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import moment from 'moment';
 
 //icons
 import SaveIcon from '@material-ui/icons/Save';
@@ -22,8 +23,8 @@ import amber from '@material-ui/core/colors/amber';
 
 
 //var
-var date = new Date('yyyy-mm-dd');
-
+var date = moment(date).format();
+var util = require('util')
 //const
 const styles = {
 	root: {
@@ -126,7 +127,9 @@ class Reservation extends Component {
 		name : '',
 		data : [],
 		submit_success : false,
-		loading : false
+		loading : false,
+		start_date : (date + '').split('+')[0].slice(0,-3),
+		end_date : (date + '').split('+')[0].slice(0,-3)
 	};
 
 	handleSave = () =>{
@@ -166,7 +169,7 @@ class Reservation extends Component {
 		this['client_pick_up'].value ='';
 		this['client_start_date'].value ='';
 		this['client_finish_date'].value ='';
-		this.state.busType = '';
+		this.setState({busType : ''})
 		this['client_notes'].value ='';
 	}
 
@@ -220,11 +223,18 @@ class Reservation extends Component {
 	  }
 
 	componentDidMount(){
+		console.log(this.state.start_date);
 		this.fetchData();
 	}
 
 	dateFormatter=(date)=>{
 		return date.replace('T', ' ');
+	}
+
+	dateChecker=()=>{
+		let start = moment(this.state.start_date);
+		let end = moment(this.state.end_date);
+		return start.isBefore(end);
 	}
 
 	_buildPayload=()=>{
@@ -315,7 +325,14 @@ class Reservation extends Component {
 						/>
 						<TextField
 							disabled={this.state.loading}
-							inputRef = {(input) => this['client_start_date'] = input}
+							value={this.state.start_date}
+							onChange={(e)=>{
+								this.setState({start_date : e.target.value},()=>{
+									if(!this.dateChecker()){
+									this.setState({end_date : this.state.start_date})
+								}
+								})
+							}}
 							label="Starting Date"
 							type="datetime-local"
 							style={styles.textField}
@@ -326,8 +343,15 @@ class Reservation extends Component {
 						/>
 						<TextField
 							disabled={this.state.loading}
-							inputRef = {(input) => this['client_finish_date'] = input}
 							label="End Date"
+							value={this.state.end_date}
+							onChange={(e)=>{
+								this.setState({end_date : e.target.value},()=>{
+									if(!this.dateChecker()){
+									this.setState({start_date: this.state.end_date})
+								}
+								})
+							}}
 							type="datetime-local"
 							style={styles.textField}
 							InputLabelProps={{

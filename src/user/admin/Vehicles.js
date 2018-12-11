@@ -13,9 +13,7 @@ import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Cookies from 'universal-cookie';
@@ -258,248 +256,256 @@ class Vehicle extends Component {
 
   render() {
       const {expanded} = this.state;
-    return (
-    <Grid container justify='center' alignItems='center' style={{flex:1, height:'80', padding:16}}>
-        <Paper style={{padding:16, textAlign:'center'}}>
-        {
-          this.state.data.map((item,id)=>(
-            <ExpansionPanel expanded={expanded === 'panel'+id} onChange={this.handleChange('panel'+id)}>
-              <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant='h5'>{item.type} {item.number}</Typography>
-              </ExpansionPanelSummary>
-              <ExpansionPanelDetails>
-              <Grid style={{paddingTop:16}}>
-                  <Grid container>
-                    <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500}}>
-                        {tileData.map(tile => (
-                        <GridListTile key={tile.img} style={{height:100, width:200}}>
-                            <img src={tile.img} alt={tile.title}/>
-                            <GridListTileBar
-                            title={tile.title}
-                            actionIcon={
-                              this.state.edit[id]?
-                              (
-                                <IconButton>
-                                  <DeleteIcon style={{color:'#FFF'}}/>
-                                </IconButton>
-                              )
-                              :
-                              null
-                            }
-                            />
-                        </GridListTile>
-                        ))}
-                    </GridList>
-                    <Grid style={{flex:0.5}}>
-                    <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginBottom:8}}>
-                        Features
-                    </Typography>
-                    <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
-                    {
-                      !this.state.edit[id]?
-                        item.feature.map((item,id)=>(
-                          <Grid container style={{textAlign:'left', flex:1, marginLeft:8,padding:8,fontWeight:'normal'}}>
-                          <Typography variant='subheading' style={{verticalAlign:'center'}}>
-                            {item.value} {item.key}
-                          </Typography>
-                          </Grid>
-                        ))
-                      :
-                      <Grid>
-                      {item.feature.map((item, feature_id)=>(
-                        <Grid container>
-                        <TextField
-                          inputRef={(input)=>{this['key'+feature_id] = input}}
-                          defaultValue={item.key}
-                          margin="normal"
-                          variant="outlined"
-                          style={{flex:1}}
-                        />
-                        <TextField
-                          inputRef={(input)=>{this['value'+feature_id] = input}}
-                          defaultValue={item.value}
-                          margin="normal"
-                          variant="outlined"
-                          type='number'
-                          style={{flex:0.5}}
-                        />
-                        <IconButton style={{flex:0.3}} onClick={()=>this._handleDeleteSpec(id,feature_id)}>
-                            <DeleteIcon style={{fontSize:'30'}}/>
-                          </IconButton>
-                        </Grid>
-                      ))}
-                      <Button onClick={()=>{
-                        item.feature.push("")
-                        this.setState({data: this.state.data})
-                      }}>
-                        Add new
-                      </Button> 
-                      </Grid>
-                    }
-                    </Grid>
-                    <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
-                        Price
-                    </Typography>
-                    {
-                      this.state.edit[id]?
-                        <Grid container style={{flex:1}} alignItems='center'>
-                        <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
-                          Rp.
-                        </Typography>
-                        <TextField
-                          inputRef={input => this['price'+id] = input}
-                          id="harga"
-                          defaultValue={item.price}
-                          margin="normal"
-                          variant="outlined"
-                          style={{flex:1}}
-                        />
-                        <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
-                          / day
-                        </Typography>
-                        </Grid>
-                        :
-                        <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
-                            Rp. {item.price} / day
-                        </Typography>
-                    }
-                    </Grid>
-                  </Grid>
-                  <Grid style={{textAlign:'right', marginTop:8}}>
-                    <Button variant='contained' color='secondary'
-                    onClick={()=>{
-                      if(window.confirm('Are you sure?')){
-                        this._handleDeleteData(item.id)
-                      }
-                    }}
-                    style={{marginRight:16}}>
-                        Delete
-                        <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
-                      </Button>
-                    {
-                      this.state.edit[id]?
-                      <Button variant='outlined' color='primary' onClick={()=>{
-                        this._handleSave(item.feature,id,item.id);
-                        }
-                      }>
-                        SAVE
-                        <DoneIcon style={{fontSize:15, marginLeft:8}}/>
-                      </Button>
-                      :
-                      <Button variant='outlined' onClick={()=>this._handleEdit(id)}>
-                        EDIT
-                        <EditIcon style={{fontSize:15, marginLeft:8}}/>
-                      </Button>
-                    }
-                    {
-                      this.state.edit[id]?
-                      <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{this._handleCancel(id)}}>
-                        CANCEL
-                        <DoneIcon style={{fontSize:15, marginLeft:8}}/>
-                      </Button>
-                      :
-                      null
-                    }
-                  </Grid>
-                </Grid>
-              </ExpansionPanelDetails>
-            </ExpansionPanel>
-          ))
-        }
-        </Paper>
-        <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}} onClick={()=>this.setState({dialog:true})}>
-            <AddIcon />
-        </Button>
-        <Dialog open={this.state.dialog} onClose={()=>this.setState({dialog : false})}>
-          <Grid style={{padding:16}}>
-            <DialogTitle>New Vehicle</DialogTitle>
-            <NewVehicle closeDialog={this._handleCloseDialog.bind(this)} successSubmit={this._newVehicleSuccess.bind(this)}/>
+      if(this.state.loading){
+        return (
+          <Grid container justify='center' alignItems='center' style={{flex:1, height:'80vh', padding:16}}>
+            <CircularProgress size={100} style={{alignSelf:'center'}}/>
           </Grid>
-        </Dialog>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          open={this.state.snack}
-          autoHideDuration={6000}
-          onClose={()=>this.setState({snack:false})}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-        >
-            <SnackbarContent
-            aria-describedby="client-snackbar"
-            style={{backgroundColor:green[600]}}
-            message={
-                <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
-                <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
-                  Added new vehicle
-                </span>
-            }
-            />
-        </Snackbar>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          open={this.state.edit_success}
-          autoHideDuration={6000}
-          onClose={()=>this.setState({edit_success:false})}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-        >
-            <SnackbarContent
-            aria-describedby="client-snackbar"
-            style={{backgroundColor:green[600]}}
-            message={
-                <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
-                <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
-                  Saved successfully
-                </span>
-            }
-            />
-        </Snackbar>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          open={this.state.delete_success}
-          autoHideDuration={6000}
-          onClose={()=>this.setState({delete_success:false})}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-        >
-            <SnackbarContent
-            aria-describedby="client-snackbar"
-            style={{backgroundColor:amber[700]}}
-            message={
-                <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
-                <InfoIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
-                  Data deleted
-                </span>
-            }
-            />
-        </Snackbar>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'center',
-          }}
-          open={this.state.loading}
-          autoHideDuration={6000}
-          onClose={this.handleClose}
-          ContentProps={{
-            'aria-describedby': 'message-id',
-          }}
-          message={<span id="message-id">Loading...</span>}
-        />
-    </Grid>
-    );
+        )
+      }else{
+        return (
+          <Grid container justify='center' alignItems='center' style={{flex:1, padding:16}}>
+              <Paper style={{padding:16, textAlign:'center'}}>
+              {
+                this.state.data.map((item,id)=>(
+                  <ExpansionPanel expanded={expanded === 'panel'+id} onChange={this.handleChange('panel'+id)}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography variant='h5'>{item.type} {item.number}</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                    <Grid style={{paddingTop:16}}>
+                        <Grid container>
+                          <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500}}>
+                              {tileData.map(tile => (
+                              <GridListTile key={tile.img} style={{height:100, width:200}}>
+                                  <img src={tile.img} alt={tile.title}/>
+                                  <GridListTileBar
+                                  title={tile.title}
+                                  actionIcon={
+                                    this.state.edit[id]?
+                                    (
+                                      <IconButton>
+                                        <DeleteIcon style={{color:'#FFF'}}/>
+                                      </IconButton>
+                                    )
+                                    :
+                                    null
+                                  }
+                                  />
+                              </GridListTile>
+                              ))}
+                          </GridList>
+                          <Grid style={{flex:0.5}}>
+                          <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginBottom:8}}>
+                              Features
+                          </Typography>
+                          <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
+                          {
+                            !this.state.edit[id]?
+                              item.feature.map((item,id)=>(
+                                <Grid container style={{textAlign:'left', flex:1, marginLeft:8,padding:8,fontWeight:'normal'}}>
+                                <Typography variant='subheading' style={{verticalAlign:'center'}}>
+                                  {item.value} {item.key}
+                                </Typography>
+                                </Grid>
+                              ))
+                            :
+                            <Grid>
+                            {item.feature.map((item, feature_id)=>(
+                              <Grid container>
+                              <TextField
+                                inputRef={(input)=>{this['key'+feature_id] = input}}
+                                defaultValue={item.key}
+                                margin="normal"
+                                variant="outlined"
+                                style={{flex:1}}
+                              />
+                              <TextField
+                                inputRef={(input)=>{this['value'+feature_id] = input}}
+                                defaultValue={item.value}
+                                margin="normal"
+                                variant="outlined"
+                                type='number'
+                                style={{flex:0.5}}
+                              />
+                              <IconButton style={{flex:0.3}} onClick={()=>this._handleDeleteSpec(id,feature_id)}>
+                                  <DeleteIcon style={{fontSize:'30'}}/>
+                                </IconButton>
+                              </Grid>
+                            ))}
+                            <Button onClick={()=>{
+                              item.feature.push("")
+                              this.setState({data: this.state.data})
+                            }}>
+                              Add new
+                            </Button> 
+                            </Grid>
+                          }
+                          </Grid>
+                          <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
+                              Price
+                          </Typography>
+                          {
+                            this.state.edit[id]?
+                              <Grid container style={{flex:1}} alignItems='center'>
+                              <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
+                                Rp.
+                              </Typography>
+                              <TextField
+                                inputRef={input => this['price'+id] = input}
+                                id="harga"
+                                defaultValue={item.price}
+                                margin="normal"
+                                variant="outlined"
+                                style={{flex:1}}
+                              />
+                              <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
+                                / day
+                              </Typography>
+                              </Grid>
+                              :
+                              <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
+                                  Rp. {item.price} / day
+                              </Typography>
+                          }
+                          </Grid>
+                        </Grid>
+                        <Grid style={{textAlign:'right', marginTop:8}}>
+                          <Button variant='contained' color='secondary'
+                          onClick={()=>{
+                            if(window.confirm('Are you sure?')){
+                              this._handleDeleteData(item.id)
+                            }
+                          }}
+                          style={{marginRight:16}}>
+                              Delete
+                              <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
+                            </Button>
+                          {
+                            this.state.edit[id]?
+                            <Button variant='outlined' color='primary' onClick={()=>{
+                              this._handleSave(item.feature,id,item.id);
+                              }
+                            }>
+                              SAVE
+                              <DoneIcon style={{fontSize:15, marginLeft:8}}/>
+                            </Button>
+                            :
+                            <Button variant='outlined' onClick={()=>this._handleEdit(id)}>
+                              EDIT
+                              <EditIcon style={{fontSize:15, marginLeft:8}}/>
+                            </Button>
+                          }
+                          {
+                            this.state.edit[id]?
+                            <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{this._handleCancel(id)}}>
+                              CANCEL
+                              <DoneIcon style={{fontSize:15, marginLeft:8}}/>
+                            </Button>
+                            :
+                            null
+                          }
+                        </Grid>
+                      </Grid>
+                    </ExpansionPanelDetails>
+                  </ExpansionPanel>
+                ))
+              }
+              </Paper>
+              <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}} onClick={()=>this.setState({dialog:true})}>
+                  <AddIcon />
+              </Button>
+              <Dialog open={this.state.dialog} onClose={()=>this.setState({dialog : false})}>
+                <Grid style={{padding:16}}>
+                  <DialogTitle>New Vehicle</DialogTitle>
+                  <NewVehicle closeDialog={this._handleCloseDialog.bind(this)} successSubmit={this._newVehicleSuccess.bind(this)}/>
+                </Grid>
+              </Dialog>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                open={this.state.snack}
+                autoHideDuration={6000}
+                onClose={()=>this.setState({snack:false})}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+              >
+                  <SnackbarContent
+                  aria-describedby="client-snackbar"
+                  style={{backgroundColor:green[600]}}
+                  message={
+                      <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
+                      <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
+                        Added new vehicle
+                      </span>
+                  }
+                  />
+              </Snackbar>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                open={this.state.edit_success}
+                autoHideDuration={6000}
+                onClose={()=>this.setState({edit_success:false})}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+              >
+                  <SnackbarContent
+                  aria-describedby="client-snackbar"
+                  style={{backgroundColor:green[600]}}
+                  message={
+                      <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
+                      <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
+                        Saved successfully
+                      </span>
+                  }
+                  />
+              </Snackbar>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right',
+                }}
+                open={this.state.delete_success}
+                autoHideDuration={6000}
+                onClose={()=>this.setState({delete_success:false})}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+              >
+                  <SnackbarContent
+                  aria-describedby="client-snackbar"
+                  style={{backgroundColor:amber[700]}}
+                  message={
+                      <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
+                      <InfoIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
+                        Data deleted
+                      </span>
+                  }
+                  />
+              </Snackbar>
+              <Snackbar
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                open={this.state.loading}
+                autoHideDuration={6000}
+                onClose={this.handleClose}
+                ContentProps={{
+                  'aria-describedby': 'message-id',
+                }}
+                message={<span id="message-id">Loading...</span>}
+              />
+          </Grid>
+          );
+      }
   }
 }
 

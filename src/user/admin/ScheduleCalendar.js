@@ -33,7 +33,8 @@ class App extends Component {
         start : new Date(data[x].start),
         end : new Date(data[x].end),
         title : data[x].type + ' ' + data[x].number + ' to ' + data[x].destination + ' by ' + data[x].name,
-        id : data[x].id  
+        id : data[x].id,
+        booking : data[x].booking  
       })
     }
     this.setState({events : arr});
@@ -107,9 +108,10 @@ class App extends Component {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">{this.state.tempData.title}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">{this.state.tempData.booking}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
+              Reservation {(this.state.tempData.title)}<br></br>
               Start : {(this.state.tempData.start + '').split ('GMT')[0]} <br></br>
               End : {(this.state.tempData.end + '').split('GMT')[0]}
             </DialogContentText>
