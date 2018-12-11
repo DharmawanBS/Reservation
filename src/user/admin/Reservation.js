@@ -139,8 +139,6 @@ class Reservation extends Component {
 			phone : this['client_phone'].value,
 			destination : this['client_destination'].value,
 			pickup : this['client_pick_up'].value,
-			start : this.dateFormatter(this['client_start_date'].value),
-			finish : this.dateFormatter(this['client_finish_date'].value),
 			notes : this['client_notes'].value,
 		});
 		this._buildPayload();
@@ -244,8 +242,8 @@ class Reservation extends Component {
 			phone : this['client_phone'].value,
 			destination : this['client_destination'].value,
 			pick_up_location : this['client_pick_up'].value,
-			start : this.dateFormatter(this['client_start_date'].value),
-			end : this.dateFormatter(this['client_finish_date'].value),
+			start : this.dateFormatter(this.state.start_date),
+			end : this.dateFormatter(this.state.end_date),
 			vehicle : this.state.busType,
 			notes : this['client_notes'].value,
 		}
@@ -325,6 +323,7 @@ class Reservation extends Component {
 						/>
 						<TextField
 							disabled={this.state.loading}
+							inputRef = {(input) => this['client_start_date'] = input}
 							value={this.state.start_date}
 							onChange={(e)=>{
 								this.setState({start_date : e.target.value},()=>{
@@ -344,6 +343,7 @@ class Reservation extends Component {
 						<TextField
 							disabled={this.state.loading}
 							label="End Date"
+							inputRef = {(input) => this['client_finish_date'] = input}
 							value={this.state.end_date}
 							onChange={(e)=>{
 								this.setState({end_date : e.target.value},()=>{
