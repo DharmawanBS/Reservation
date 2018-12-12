@@ -37,6 +37,7 @@ import Reservation from './Reservation';
 import ScheduleCalendar from './ScheduleCalendar';
 import User from './User';
 import Order from './Order';
+import Vehicles from './Vehicles';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -262,6 +263,7 @@ class App extends Component {
             <Route exact path='/admin/Schedules' component={ScheduleCalendar}/>
             <Route exact path='/admin/Users' component={User}/>
             <Route exact path='/admin/Orders' component={Order}/>
+            <Route exact path='/admin/Vehicles' component={Vehicles}/>
           </Grid>
         </main>
       </div>

@@ -102,7 +102,9 @@ class Reservation extends Component {
 		dateNow: date,
 		busType: '',
 		price: '',
-		notes: ''
+		notes: '',
+		phone: '',
+		name: '',
 	};
 
 	render() {
@@ -117,6 +119,7 @@ class Reservation extends Component {
 							label="Client Name"
 							fullWidth
 							style={[styles.textField, styles.dense]}
+							onChange={this.handleChange('name')}
 							margin="dense"
 							variant="outlined"
 						/>
@@ -147,6 +150,7 @@ class Reservation extends Component {
 							label="Phone"
 							fullWidth
 							style={[styles.textField, styles.dense]}
+							onChange={this.handleChange('phone')}
 							margin="dense"
 							variant="outlined"
 						/>

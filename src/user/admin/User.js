@@ -279,7 +279,7 @@ class User extends Component {
               <TableBody>
                 {stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map(n => {
+                  .map((n,id) => {
                     return (
                       <TableRow
                         hover
@@ -288,7 +288,7 @@ class User extends Component {
                         onClick={this.handleClickOpen('paper',n)}
                       >
                         <TableCell component="th" scope="row" padding="default">
-                          {n.num}
+                          { id + (page * rowsPerPage) + 1 }
                         </TableCell>
                         <TableCell>{n.idnum}</TableCell>
                         <TableCell>{n.name}</TableCell>
