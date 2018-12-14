@@ -27,7 +27,7 @@ import DoneIcon from '@material-ui/icons/Done';
 import NewVehicle from "./NewVehicle";
 import CloseIcon from '@material-ui/icons/Close';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import ErrorIcon from '@material-ui/icons/Error';
+import SearchIcon from '@material-ui/icons/Search';
 import InfoIcon from '@material-ui/icons/Info';
 import green from '@material-ui/core/colors/green';
 import amber from '@material-ui/core/colors/amber';
@@ -69,7 +69,7 @@ const tileData = [
 class Vehicle extends Component {
   state = {
       expanded : null,
-      edit : [],
+      edit : [{}],
       spec : [
         "- Jumlah kursi 59 seat",
         "- Air Conditioner",
@@ -89,7 +89,9 @@ class Vehicle extends Component {
       snack : false,
       edit_success : false,
       delete_success : false,
-      loading : true
+      loading : true,
+      search : '',
+      data_search : []
   };
 
   componentDidMount(){
@@ -106,9 +108,10 @@ class Vehicle extends Component {
       if(responseJSON.msg.toLowerCase() === 'ok'){
         this.setState({
           data : responseJSON.data,
+          data_search : responseJSON.data
         });
         for(let x=0;x<responseJSON.data.length;x++){
-          arr.push(false);
+          arr.push({id : responseJSON.data[x].id, edit_now : false});
         };
         this.setState({
           edit : arr,
@@ -169,7 +172,7 @@ class Vehicle extends Component {
 
   _handleDeleteSpec=(id,ids)=>{
     var myData = [...this.state.data];
-    var features = myData[id].feature;
+    var features = myData[myData.findIndex(item=>item.id === id)].feature;
     features.splice(ids,1);
     
     let len = features.length;
@@ -183,16 +186,16 @@ class Vehicle extends Component {
     })
   }
 
-  _handleEdit=(id)=>{
+  _handleEdit=(item_id)=>{
     let arr = [...this.state.edit];
-    arr[id]=true;
+    arr[arr.findIndex(item=>item.id === item_id)].edit_now=true;
     this.setState({
       edit : arr,
-      oldSpec : this.state.data[id].feature
+      oldSpec : this.state.data[this.state.data.findIndex(item=>item.id === item_id)].feature
     })
   }
 
-  _handleSave=(feature,id,item_id)=>{
+  _handleSave=(feature,item_id)=>{
     let len = feature.length;
     var arr = []
     for(let x=0; x<len; x++){
@@ -204,21 +207,21 @@ class Vehicle extends Component {
       arr.push(obj);
     }
     var myData = [...this.state.data];
-    myData[id].feature = arr;
-    myData[id].price = this['price'+id].value;
+    myData[myData.findIndex(item => item.id === item_id)].feature = arr;
+    myData[myData.findIndex(item => item.id === item_id)].price = this['price'+item_id].value;
     var editor = [...this.state.edit];
-    editor[id] = false;
+    editor[myData.findIndex(item => item.id === item_id)].edit_now = false;
     this.setState({
       data : myData,
       edit : editor
     })
-    var all = {...this.state.data[id], user : cookies.get('user_id')};
+    var all = {...this.state.data[myData.findIndex(item => item.id === item_id)], user : cookies.get('user_id')};
     var new_format = {};
     all.feature.forEach((element,id) => {
       new_format[element.key] = element.value
     });
     all.feature = new_format;
-    all.price = this['price'+id].value;
+    all.price = this['price'+item_id].value;
     console.log(all);
     fetch('http://api.jakartabusrent.com/index.php/Vehicle/update',{
       method : 'POST',
@@ -237,11 +240,11 @@ class Vehicle extends Component {
     })
   }
 
-  _handleCancel=(id)=>{
+  _handleCancel=(item_id)=>{
     var arr = [...this.state.edit];
-    arr[id]=false;
+    arr[arr.findIndex(item=>item.id === item_id)].edit_now=false;
     var features = [...this.state.data];
-    features[id].feature = this.state.oldSpec;
+    features[features.findIndex(item=>item.id===item_id)].feature = this.state.oldSpec;
     
     this.setState({
       edit : arr,
@@ -254,6 +257,22 @@ class Vehicle extends Component {
     this.fetchData();
   }
 
+  getSuggestions = () => {
+    const inputValue = this.state.search.trim().toLowerCase();
+    const inputLength = inputValue.length;
+  
+    var arr = inputLength === 0 ? this.state.data : this.state.data.filter(item =>
+      item.type.toLowerCase().slice(0, inputLength) === inputValue || item.number.toLowerCase().slice(0, inputLength) === inputValue
+    );
+    this.setState({
+      data_search : arr
+    })
+  };
+
+  _checkEditNow=(item_id)=>{
+    return this.state.edit.findIndex(item=>item.id === item_id);
+  }
+
   render() {
       const {expanded} = this.state;
       if(this.state.loading){
@@ -264,11 +283,28 @@ class Vehicle extends Component {
         )
       }else{
         return (
-          <Grid container justify='center' alignItems='center' style={{flex:1, padding:16}}>
-              <Paper style={{padding:16, textAlign:'center'}}>
+          <Grid container justify='center' alignItems='center' style={{flex:1}}>
+              <Paper style={{paddingTop:0, padding:16, textAlign:'center', width:'85vw'}}>
+              <Grid style={{padding:8, marginBottom:8}} container alignItems="flex-end" justify='flex-end' >
+                <Grid container style={{borderWidth:0.5,borderStyle:'solid', borderRadius:5, borderColor:'rgba(0,0,0,0.2)',height:50, width:250}} alignItems="center" justify='flex-start' >
+                  <Grid item onClick={()=>this['search'].focus()} style={{padding:8,borderWidth:0, borderRightWidth:0.5, borderStyle:'solid',borderColor:'rgba(0,0,0,0.2)'}}>
+                      <SearchIcon style={{fontSize:25, verticalAlign:'center', color:'rgba(0,0,0,0.2)'}}/>
+                    </Grid>
+                  <Grid item>
+                    <TextField value={this.state.search} onChange={(e)=>{
+                      this.setState({search : e.target.value},()=>this.getSuggestions())
+                    }}
+                    style={{fontSize:18, padding:8}}
+                    placeholder='Search...'
+                    InputProps={{disableUnderline : true}}
+                    type='search'
+                    inputRef={(input)=> this['search'] = input}/>
+                  </Grid>
+                </Grid>
+              </Grid>
               {
-                this.state.data.map((item,id)=>(
-                  <ExpansionPanel expanded={expanded === 'panel'+id} onChange={this.handleChange('panel'+id)}>
+                this.state.data_search.map((item)=>(
+                  <ExpansionPanel expanded={expanded === 'panel'+item.id} onChange={this.handleChange('panel'+item.id)}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography variant='h5'>{item.type} {item.number}</Typography>
                     </ExpansionPanelSummary>
@@ -282,7 +318,7 @@ class Vehicle extends Component {
                                   <GridListTileBar
                                   title={tile.title}
                                   actionIcon={
-                                    this.state.edit[id]?
+                                    this.state.edit[this._checkEditNow(item.id)].edit_now?
                                     (
                                       <IconButton>
                                         <DeleteIcon style={{color:'#FFF'}}/>
@@ -301,7 +337,7 @@ class Vehicle extends Component {
                           </Typography>
                           <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
                           {
-                            !this.state.edit[id]?
+                            !this.state.edit[this._checkEditNow(item.id)].edit_now?
                               item.feature.map((item,id)=>(
                                 <Grid container style={{textAlign:'left', flex:1, marginLeft:8,padding:8,fontWeight:'normal'}}>
                                 <Typography variant='subheading' style={{verticalAlign:'center'}}>
@@ -328,7 +364,7 @@ class Vehicle extends Component {
                                 type='number'
                                 style={{flex:0.5}}
                               />
-                              <IconButton style={{flex:0.3}} onClick={()=>this._handleDeleteSpec(id,feature_id)}>
+                              <IconButton style={{flex:0.3}} onClick={()=>this._handleDeleteSpec(item.id,feature_id)}>
                                   <DeleteIcon style={{fontSize:'30'}}/>
                                 </IconButton>
                               </Grid>
@@ -346,13 +382,13 @@ class Vehicle extends Component {
                               Price
                           </Typography>
                           {
-                            this.state.edit[id]?
+                            this.state.edit[this._checkEditNow(item.id)].edit_now?
                               <Grid container style={{flex:1}} alignItems='center'>
                               <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
                                 Rp.
                               </Typography>
                               <TextField
-                                inputRef={input => this['price'+id] = input}
+                                inputRef={input => this['price'+item.id] = input}
                                 id="harga"
                                 defaultValue={item.price}
                                 margin="normal"
@@ -382,23 +418,23 @@ class Vehicle extends Component {
                               <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
                             </Button>
                           {
-                            this.state.edit[id]?
+                            this.state.edit[this._checkEditNow(item.id)].edit_now?
                             <Button variant='outlined' color='primary' onClick={()=>{
-                              this._handleSave(item.feature,id,item.id);
+                              this._handleSave(item.feature,item.id);
                               }
                             }>
                               SAVE
                               <DoneIcon style={{fontSize:15, marginLeft:8}}/>
                             </Button>
                             :
-                            <Button variant='outlined' onClick={()=>this._handleEdit(id)}>
+                            <Button variant='outlined' onClick={()=>this._handleEdit(item.id)}>
                               EDIT
                               <EditIcon style={{fontSize:15, marginLeft:8}}/>
                             </Button>
                           }
                           {
-                            this.state.edit[id]?
-                            <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{this._handleCancel(id)}}>
+                            this.state.edit[this._checkEditNow(item.id)].edit_now?
+                            <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{this._handleCancel(item.id)}}>
                               CANCEL
                               <DoneIcon style={{fontSize:15, marginLeft:8}}/>
                             </Button>

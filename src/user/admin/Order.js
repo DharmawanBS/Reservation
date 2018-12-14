@@ -35,13 +35,8 @@ import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
 import ClearIcon from '@material-ui/icons/Clear';
 
-<<<<<<< HEAD
-let num = 0;
-function createData(idnum, name, start_date, end_date, price) {
-=======
 var num = 0;
-function createData(idnum, name, address, total, last_resv) {
->>>>>>> frontend_test1
+function createData(idnum, name, start_date, end_date, price) {
     num += 1;
     return { num, idnum, name, start_date, end_date, price };
 }
