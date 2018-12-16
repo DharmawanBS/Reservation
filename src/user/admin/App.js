@@ -37,6 +37,7 @@ import Face from '@material-ui/icons/Face';
 import DirectionsBus from '@material-ui/icons/DirectionsBus';
 import Receipt from '@material-ui/icons/Receipt'
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
+import People from '@material-ui/icons/People';
 //routes
 import Dashboards from './Dashboard';
 import Reservation from './Reservation';
@@ -45,6 +46,7 @@ import User from './User';
 import Order from './Order';
 import Vehicle from './Vehicles';
 import EditUserForm from './EditUserForm';
+import UserType from './UserType';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -322,6 +324,12 @@ class App extends Component {
                     <ListItemText primary={'Manage Users'} />
                   </ListItem>
                 </Tooltip>
+                <Tooltip title='Manage User Types' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'user-type'} onClick={()=>{this._toReservation('user-type')}}>
+                    <ListItemIcon><People /></ListItemIcon>
+                    <ListItemText primary={'Manage User Types'} />
+                  </ListItem>
+                </Tooltip>
                 <Tooltip title='Manage Vehicles' placement='right' disableHoverListener={this.state.open}>
                   <ListItem button key={'vehicles'} onClick={()=>{this._toReservation('vehicles')}}>
                     <ListItemIcon><DirectionsBus /></ListItemIcon>
@@ -340,6 +348,7 @@ class App extends Component {
               <Route exact path='/admin/vehicles' component={Vehicle}/>
               <Route exact path='/admin/Orders' component={Order}/>
               <Route exact path='/admin/editformuser' component={EditUserForm}/>
+              <Route exact path='/admin/user-type' component={UserType}/>
             </Grid>
           </main>
         </div>

@@ -23,6 +23,9 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
+import MenuItem from '@material-ui/core/MenuItem';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import moment from 'moment';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -35,16 +38,9 @@ import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
 import ClearIcon from '@material-ui/icons/Clear';
 
-<<<<<<< HEAD
-let num = 0;
-function createData(idnum, name, start_date, end_date, price) {
-=======
-var num = 0;
-function createData(idnum, name, address, total, last_resv) {
->>>>>>> frontend_test1
-    num += 1;
-    return { num, idnum, name, start_date, end_date, price };
-}
+//var
+var date = moment(date).format();
+var util = require('util')
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -71,11 +67,11 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-    { id: 'num', numeric: false, disablePadding: false, label: '#' },
-    { id: 'idnum', numeric: false, disablePadding: false, label: 'ID Reservation' },
+    { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
+    { id: 'booking', numeric: false, disablePadding: false, label: 'Booking Number' },
     { id: 'name', numeric: false, disablePadding: false, label: 'Client Name' },
-    { id: 'start_date', numeric: false, disablePadding: false, label: 'Start Date' },
-    { id: 'end_date', numeric: false, disablePadding: false, label: 'End Date' },
+    { id: 'start', numeric: false, disablePadding: false, label: 'Start Date' },
+    { id: 'end', numeric: false, disablePadding: false, label: 'End Date' },
     { id: 'price', numeric: false, disablePadding: false, label: 'Price' },
 ];
 
@@ -196,14 +192,6 @@ class Order extends Component {
   state = {
     order: 'asc',
     orderBy: 'num',
-    data: [
-        createData('123456789', 'Adi Lalala', '05/06/2018', '07/06/2018', 5000000),
-        createData('112233445', 'Boni Yeyeye', '25/05/2018', '27/05/2018', 5000000),
-        createData('789456723', 'Citra Lololo', '14/10/2018', '14/10/2018', 2500000),
-        createData('145683582', 'Deni Hahahaha', '05/03/2018', '09/03/2018', 10000000),
-        createData('673825146', 'Eka Yoyoyo', '01/09/2018', '01/09/2018', 2500000),
-        createData('673941674', 'Feni Yayaya', '30/09/2018', '01/10/2018', 5000000),
-    ],
     page: 0,
     rowsPerPage: 5,
     open: false,
@@ -212,8 +200,48 @@ class Order extends Component {
     openDelete: false,
     edit: false,
     openAdd: false,
+    data: [],
+    idVehicle: '',
+    vehicleData: [],
+    userVehicleData: [],
+    start_date : '',
+		end_date : '',
   };
 
+  handleChangeTextbox = name => event => {
+		this.setState({
+		  [name]: event.target.value,
+		});
+	  };
+
+	handleChange = name => event => {
+		this.setState({
+			[name]: event.target.value,
+		});
+		if(name === 'busType'){
+			var result = this.state.vehicleData.filter(obj => {
+				return obj.id === event.target.value
+			  })
+			  var mult = 1;
+			  if(this['client_start_date'].value !== '' && this['client_finish_date'].value !== ''){
+				let a = this['client_start_date'].value.split('T')[0], b = this['client_finish_date'].value.split('T')[0];
+				  mult = this.dateDiffInDays(new Date(a),new Date(b));
+			  }
+			  this.setState({
+				  price : result[0].price * mult
+			  })
+		}
+	};
+
+	dateDiffInDays(a, b) {
+		const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+		// Discard the time and time-zone information.
+		const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
+		const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
+	  
+		return Math.floor((utc2 - utc1) / _MS_PER_DAY);
+    }
+    
   handleRequestSort = (event, property) => {
     const orderBy = property;
     let order = 'desc';
@@ -233,8 +261,36 @@ class Order extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  handleClickOpen = (scroll,rowData) => () => {
-    this.setState({ open: true, scroll, dialogData: rowData });
+  handleClickOpen = (scroll,num) => () => {
+    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
+      method : 'POST',
+      body : JSON.stringify({id: num})
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+        dialogData : responseJSON.data[0],
+        idVehicle : responseJSON.data[0].vehicle,
+        open: true, 
+        scroll
+			});
+		  }
+    });
+    fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
+      method : 'POST',
+      body : JSON.stringify({id: this.state.idVehicle})
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+        userVehicleData : responseJSON.data[0],
+			});
+		  }
+    });
   };
 
   handleClose = () => {
@@ -261,6 +317,50 @@ class Order extends Component {
     this.props.history.replace('/admin/' + text);
   }
 
+  fetchData=()=>{
+    //get list all reservasi
+    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  data : responseJSON.data
+			});
+		  }
+    });
+    
+    //get list all vehicle
+    fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  vehicleData : responseJSON.data
+			});
+		  }
+		})
+  }
+  
+  dateChecker=()=>{
+		let start = moment(this.state.start_date);
+		let end = moment(this.state.end_date);
+		return start.isBefore(end);
+  }
+  
+  dateFormatter=(date)=>{
+		return date.replace('T', ' ');
+	}
+
+	componentDidMount(){
+		this.fetchData();
+	}
+
   render() {
     const { classes } = this.props;
     const { data, order, orderBy, rowsPerPage, page } = this.state;
@@ -286,15 +386,15 @@ class Order extends Component {
                         hover
                         key={n.id}
                         padding= 'default'
-                        onClick={this.handleClickOpen('paper',n)}
+                        onClick={this.handleClickOpen('paper',n.id)}
                       >
                         <TableCell component="th" scope="row" padding="default">
-                          {n.num}
+                          {n.id}
                         </TableCell>
-                        <TableCell>{n.idnum}</TableCell>
+                        <TableCell>{n.booking}</TableCell>
                         <TableCell>{n.name}</TableCell>
-                        <TableCell>{n.start_date}</TableCell>
-                        <TableCell>{n.end_date}</TableCell>
+                        <TableCell>{n.start}</TableCell>
+                        <TableCell>{n.end}</TableCell>
                         <TableCell>{n.price}</TableCell>
                       </TableRow>
                     );
@@ -334,16 +434,37 @@ class Order extends Component {
                   ! this.state.edit ? (
                     <List>
                       <ListItem>
-                        <ListItemText primary="ID Reservation" secondary={this.state.dialogData.idnum} />
+                        <ListItemText primary="ID" secondary={this.state.dialogData.id} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Booking Number" secondary={this.state.dialogData.booking} />
                       </ListItem>
                       <ListItem>
                         <ListItemText primary="Client Name" secondary={this.state.dialogData.name} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Start Date" secondary={this.state.dialogData.start_date} />
+                        <ListItemText primary="Client Phone Number" secondary={this.state.dialogData.phone} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="End Date" secondary={this.state.dialogData.end_date} />
+                        <ListItemText primary="Destination" secondary={this.state.dialogData.destination} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Pickup Location" secondary={this.state.dialogData.pick_up_location} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Notes" secondary={this.state.dialogData.notes} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Vehicle" secondary={this.state.userVehicleData.type} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Vehicle Number" secondary={this.state.dialogData.number} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Start Date" secondary={this.state.dialogData.start} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="End Date" secondary={this.state.dialogData.end} />
                       </ListItem>
                       <ListItem>
                         <ListItemText primary="Price" secondary={this.state.dialogData.price} />
@@ -352,50 +473,130 @@ class Order extends Component {
                   ) : (
                     <form>
                       <TextField
-                      id="client-idnum"
-                      label="ID Reservation"
-                      value={this.state.dialogData.idnum}
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
+                        inputRef = {(input) => this['client_name'] = input}
+                        label="Client Name"
+                        fullWidth
+                        style={[styles.textField, styles.dense]}
+                        defaultValue={this.state.dialogData.name}
+                        margin="dense"
+                        variant="outlined"
+                        disabled={this.state.loading}
                       />
                       <TextField
-                        id="client-name"
-                        label="Client Full Name"
-                        value={this.state.dialogData.name}
+                        inputRef = {(input) => this['client_phone'] = input}
+                        label="Client Phone Number"
                         fullWidth
-                        className={[classes.textField, classes.dense]}
+                        style={[styles.textField, styles.dense]}
+                        defaultValue={this.state.dialogData.phone}
                         margin="dense"
                         variant="outlined"
                       />
                       <TextField
-                        id="client-address"
-                        label="Start Date"
+                        inputRef = {(input) => this['client_destination'] = input}
+                        label="Destination"
+                        multiline
+                        rowsMax="4"
+                        style={styles.textField}
+                        defaultValue={this.state.dialogData.destination}
+                        margin="normal"
+                        variant="outlined"
+                        fullWidth
+                      />
+                      <TextField
+                        inputRef = {(input) => this['client_pick_up'] = input}
+                        label="Pick Up Location"
+                        multiline
+                        rowsMax="4"
+                        style={styles.textField}
+                        defaultValue={this.state.dialogData.pick_up_location}
+                        margin="normal"
+                        variant="outlined"
+                        fullWidth
+                      />
+                      <TextField
+                        inputRef = {(input) => this['client_start_date'] = input}
+                        defaultValue={(this.state.dialogData.start + '').split('+')[0].slice(0,-3)}
+                        value={this.state.start_date}
+                        onChange={(e)=>{
+                          this.setState({start_date : e.target.value},()=>{
+                            if(!this.dateChecker()){
+                            this.setState({end_date : this.state.start_date})
+                          }
+                          })
+                        }}
+                        label="Starting Date"
                         type="datetime-local"
-                        value={this.state.dialogData.start_date}
+                        style={styles.textField}
+                        InputLabelProps={{
+                        shrink: true,
+                        }}
                         fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
-                        variant="outlined"
                       />
                       <TextField
-                        id="client-address"
                         label="End Date"
+                        inputRef = {(input) => this['client_finish_date'] = input}
+                        defaultValue={(this.state.dialogData.end + '').split('+')[0].slice(0,-3)}
+                        value={this.state.end_date}
+                        onChange={(e)=>{
+                          this.setState({end_date : e.target.value},()=>{
+                            if(!this.dateChecker()){
+                            this.setState({start_date: this.state.end_date})
+                          }
+                          })
+                        }}
                         type="datetime-local"
-                        value={this.state.dialogData.end_date}
+                        style={styles.textField}
+                        InputLabelProps={{
+                        shrink: true,
+                        }}
                         fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
-                        variant="outlined"
                       />
                       <TextField
-                        id="client-email"
-                        label="Vehicle"
-                        fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
+                        inputRef = {(input) => this['client_bus_type'] = input}
+                        select
+                        label="Bus Type"
+                        style={styles.textField}
+                        value={this.state.busType}
+                        onChange={this.handleChange('busType')}
+                        SelectProps={{
+                          MenuProps: {
+                          
+                          },
+                        }}
+                        margin="normal"
                         variant="outlined"
+                        fullWidth
+                      >
+                        {this.state.vehicleData.map(option => (
+                          <MenuItem key={option.id} value={option.id}>
+                          {option.type} {option.number}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                      <TextField
+                        disabled={this.state.loading}
+                        inputRef = {(input) => this['client_notes'] = input}
+                        label="Notes"
+                        multiline
+                        rowsMax="4"
+                        style={styles.textField}
+                        defaultValue={this.state.dialogData.notes}
+                        margin="normal"
+                        variant="outlined"
+                        fullWidth
+                      />
+                      <TextField
+                        inputRef = {(input) => this['price'] = input}
+                        style={[styles.dense, styles.textField]}
+                        variant="outlined"
+                        label="Price"
+                        value={this.state.price}
+                        defaultValue={this.state.dialogData.price}
+                        InputProps={{
+                          startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
+                        }}
+                        fullWidth
+                        type='Number'
                       />
                     </form>
                   )
