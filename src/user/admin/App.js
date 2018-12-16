@@ -47,6 +47,9 @@ import Order from './Order';
 import Vehicle from './Vehicles';
 import EditUserForm from './EditUserForm';
 import UserType from './UserType';
+import NewUser from './NewUser';
+import UpdateUser from './UpdateUser';
+import UpdateOrder from './UpdateOrder';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -349,6 +352,9 @@ class App extends Component {
               <Route exact path='/admin/Orders' component={Order}/>
               <Route exact path='/admin/editformuser' component={EditUserForm}/>
               <Route exact path='/admin/user-type' component={UserType}/>
+              <Route exact path='/admin/user/new' component={NewUser}/>
+              <Route exact path='/admin/user/update/:id' component={UpdateUser}/>
+              <Route exact path='/admin/order/:id' component={UpdateOrder}/>
             </Grid>
           </main>
         </div>

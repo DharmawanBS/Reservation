@@ -198,7 +198,6 @@ class Order extends Component {
     scroll: 'paper',
     dialogData: [],
     openDelete: false,
-    edit: false,
     openAdd: false,
     data: [],
     idVehicle: '',
@@ -208,40 +207,6 @@ class Order extends Component {
 		end_date : '',
   };
 
-  handleChangeTextbox = name => event => {
-		this.setState({
-		  [name]: event.target.value,
-		});
-	  };
-
-	handleChange = name => event => {
-		this.setState({
-			[name]: event.target.value,
-		});
-		if(name === 'busType'){
-			var result = this.state.vehicleData.filter(obj => {
-				return obj.id === event.target.value
-			  })
-			  var mult = 1;
-			  if(this['client_start_date'].value !== '' && this['client_finish_date'].value !== ''){
-				let a = this['client_start_date'].value.split('T')[0], b = this['client_finish_date'].value.split('T')[0];
-				  mult = this.dateDiffInDays(new Date(a),new Date(b));
-			  }
-			  this.setState({
-				  price : result[0].price * mult
-			  })
-		}
-	};
-
-	dateDiffInDays(a, b) {
-		const _MS_PER_DAY = 1000 * 60 * 60 * 24;
-		// Discard the time and time-zone information.
-		const utc1 = Date.UTC(a.getFullYear(), a.getMonth(), a.getDate());
-		const utc2 = Date.UTC(b.getFullYear(), b.getMonth(), b.getDate());
-	  
-		return Math.floor((utc2 - utc1) / _MS_PER_DAY);
-    }
-    
   handleRequestSort = (event, property) => {
     const orderBy = property;
     let order = 'desc';
@@ -294,11 +259,11 @@ class Order extends Component {
   };
 
   handleClose = () => {
-    this.setState({ open: false }, () => { this.setState({ edit: false })});
+    this.setState({ open: false });
   };
 
-  handleEdit = () => {
-    this.setState({ edit: true });
+  handleEdit = (text) => {
+    this.props.history.replace('/admin/order/' + text);
   };
 
   handleClickCancel = () => {
@@ -347,17 +312,42 @@ class Order extends Component {
 		})
   }
   
-  dateChecker=()=>{
-		let start = moment(this.state.start_date);
-		let end = moment(this.state.end_date);
-		return start.isBefore(end);
+  _handleDeleteButton = (id) => {
+    if(!(id === '')){
+        if(window.confirm("Delete this data?")){
+            this._deletePayload(id);
+        }
+    }else{
+        window.alert('Can not delete, please check again');
+    }
   }
-  
-  dateFormatter=(date)=>{
-		return date.replace('T', ' ');
-	}
 
-	componentDidMount(){
+  _deletePayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/delete',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : JSON.stringify({id: id})
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleCloseDelete();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
+  }
+
+  componentDidMount(){
 		this.fetchData();
 	}
 
@@ -430,209 +420,61 @@ class Order extends Component {
             <DialogTitle id="scroll-dialog-title">Reservation Data</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
-                {
-                  ! this.state.edit ? (
-                    <List>
-                      <ListItem>
-                        <ListItemText primary="ID" secondary={this.state.dialogData.id} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Booking Number" secondary={this.state.dialogData.booking} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Client Name" secondary={this.state.dialogData.name} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Client Phone Number" secondary={this.state.dialogData.phone} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Destination" secondary={this.state.dialogData.destination} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Pickup Location" secondary={this.state.dialogData.pick_up_location} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Notes" secondary={this.state.dialogData.notes} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Vehicle" secondary={this.state.userVehicleData.type} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Vehicle Number" secondary={this.state.dialogData.number} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Start Date" secondary={this.state.dialogData.start} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="End Date" secondary={this.state.dialogData.end} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Price" secondary={this.state.dialogData.price} />
-                      </ListItem>
-                    </List>
-                  ) : (
-                    <form>
-                      <TextField
-                        inputRef = {(input) => this['client_name'] = input}
-                        label="Client Name"
-                        fullWidth
-                        style={[styles.textField, styles.dense]}
-                        defaultValue={this.state.dialogData.name}
-                        margin="dense"
-                        variant="outlined"
-                        disabled={this.state.loading}
-                      />
-                      <TextField
-                        inputRef = {(input) => this['client_phone'] = input}
-                        label="Client Phone Number"
-                        fullWidth
-                        style={[styles.textField, styles.dense]}
-                        defaultValue={this.state.dialogData.phone}
-                        margin="dense"
-                        variant="outlined"
-                      />
-                      <TextField
-                        inputRef = {(input) => this['client_destination'] = input}
-                        label="Destination"
-                        multiline
-                        rowsMax="4"
-                        style={styles.textField}
-                        defaultValue={this.state.dialogData.destination}
-                        margin="normal"
-                        variant="outlined"
-                        fullWidth
-                      />
-                      <TextField
-                        inputRef = {(input) => this['client_pick_up'] = input}
-                        label="Pick Up Location"
-                        multiline
-                        rowsMax="4"
-                        style={styles.textField}
-                        defaultValue={this.state.dialogData.pick_up_location}
-                        margin="normal"
-                        variant="outlined"
-                        fullWidth
-                      />
-                      <TextField
-                        inputRef = {(input) => this['client_start_date'] = input}
-                        defaultValue={(this.state.dialogData.start + '').split('+')[0].slice(0,-3)}
-                        value={this.state.start_date}
-                        onChange={(e)=>{
-                          this.setState({start_date : e.target.value},()=>{
-                            if(!this.dateChecker()){
-                            this.setState({end_date : this.state.start_date})
-                          }
-                          })
-                        }}
-                        label="Starting Date"
-                        type="datetime-local"
-                        style={styles.textField}
-                        InputLabelProps={{
-                        shrink: true,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        label="End Date"
-                        inputRef = {(input) => this['client_finish_date'] = input}
-                        defaultValue={(this.state.dialogData.end + '').split('+')[0].slice(0,-3)}
-                        value={this.state.end_date}
-                        onChange={(e)=>{
-                          this.setState({end_date : e.target.value},()=>{
-                            if(!this.dateChecker()){
-                            this.setState({start_date: this.state.end_date})
-                          }
-                          })
-                        }}
-                        type="datetime-local"
-                        style={styles.textField}
-                        InputLabelProps={{
-                        shrink: true,
-                        }}
-                        fullWidth
-                      />
-                      <TextField
-                        inputRef = {(input) => this['client_bus_type'] = input}
-                        select
-                        label="Bus Type"
-                        style={styles.textField}
-                        value={this.state.busType}
-                        onChange={this.handleChange('busType')}
-                        SelectProps={{
-                          MenuProps: {
-                          
-                          },
-                        }}
-                        margin="normal"
-                        variant="outlined"
-                        fullWidth
-                      >
-                        {this.state.vehicleData.map(option => (
-                          <MenuItem key={option.id} value={option.id}>
-                          {option.type} {option.number}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                      <TextField
-                        disabled={this.state.loading}
-                        inputRef = {(input) => this['client_notes'] = input}
-                        label="Notes"
-                        multiline
-                        rowsMax="4"
-                        style={styles.textField}
-                        defaultValue={this.state.dialogData.notes}
-                        margin="normal"
-                        variant="outlined"
-                        fullWidth
-                      />
-                      <TextField
-                        inputRef = {(input) => this['price'] = input}
-                        style={[styles.dense, styles.textField]}
-                        variant="outlined"
-                        label="Price"
-                        value={this.state.price}
-                        defaultValue={this.state.dialogData.price}
-                        InputProps={{
-                          startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
-                        }}
-                        fullWidth
-                        type='Number'
-                      />
-                    </form>
-                  )
-                }
+                <List>
+                  <ListItem>
+                    <ListItemText primary="ID" secondary={this.state.dialogData.id} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Booking Number" secondary={this.state.dialogData.booking} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Client Name" secondary={this.state.dialogData.name} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Client Phone Number" secondary={this.state.dialogData.phone} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Destination" secondary={this.state.dialogData.destination} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Pickup Location" secondary={this.state.dialogData.pick_up_location} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Notes" secondary={this.state.dialogData.notes} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Vehicle" secondary={this.state.userVehicleData.type} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Vehicle Number" secondary={this.state.dialogData.number} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Start Date" secondary={this.state.dialogData.start} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="End Date" secondary={this.state.dialogData.end} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Price" secondary={this.state.dialogData.price} />
+                  </ListItem>
+                </List>
               </DialogContentText>
             </DialogContent>
             <DialogActions>
-              {
-                ! this.state.edit ? (
-                  <div>
-                    <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
-                      Deactivate
-                      <BlockIcon className={classes.rightIcon}/>
-                    </Button>
-                    <Button onClick={this.handleEdit} color="primary" variant="contained" className={classes.button}>
-                      Edit
-                      <CreateIcon className={classes.rightIcon}/>
-                    </Button>
-                    <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
-                      Delete
-                      <DeleteIcon className={classes.rightIcon} />
-                    </Button>
-                  </div>
-                ) : (
-                  <div>
-                    <Button variant="contained" color="primary" onClick={this.handleClose} className={classes.button}>
-                      Save
-                      <SaveIcon style={styles.rightIcon} />
-                    </Button>
-                    <Button onClick={this.handleClickCancel} color="secondary" variant="contained" className={classes.button}>
-                      Cancel
-                      <ClearIcon style={styles.rightIcon} />
-                    </Button>
-                  </div>
-                )
-              }
+              <div>
+                <Button onClick={this.handleClose} color="primary" variant="contained" className={classes.button}>
+                  Deactivate
+                  <BlockIcon className={classes.rightIcon}/>
+                </Button>
+                <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
+                  Edit
+                  <CreateIcon className={classes.rightIcon}/>
+                </Button>
+                <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
+                  Delete
+                  <DeleteIcon className={classes.rightIcon} />
+                </Button>
+              </div>
             </DialogActions>
           </Dialog>
           <Dialog
@@ -651,7 +493,7 @@ class Order extends Component {
               <Button onClick={this.handleCloseDelete} color="primary" className={classes.button}>
                 Disagree
               </Button>
-              <Button onClick={this.handleCloseDelete} color="primary" className={classes.button}>
+              <Button onClick={()=>this._handleDeleteButton(this.dialogData.id)} color="primary" className={classes.button}>
                 Agree
               </Button>
             </DialogActions>
