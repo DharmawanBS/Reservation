@@ -378,7 +378,7 @@ class User extends Component {
               <TableBody>
                 {stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map(n => {
+                  .map((n,id) => {
                     return (
                       <TableRow
                         hover

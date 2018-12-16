@@ -263,6 +263,7 @@ class Reservation extends Component {
 							label="Client Name"
 							fullWidth
 							style={[styles.textField, styles.dense]}
+							onChange={this.handleChange('name')}
 							margin="dense"
 							variant="outlined"
 							disabled={this.state.loading}
@@ -296,6 +297,7 @@ class Reservation extends Component {
 							label="Phone"
 							fullWidth
 							style={[styles.textField, styles.dense]}
+							onChange={this.handleChange('phone')}
 							margin="dense"
 							variant="outlined"
 						/>
