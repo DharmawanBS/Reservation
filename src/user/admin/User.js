@@ -21,12 +21,9 @@ import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import Cookies from 'universal-cookie';
+import Snackbar from '@material-ui/core/Snackbar';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -34,12 +31,9 @@ import { withStyles } from '@material-ui/core/styles';
 //icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
-import ClearIcon from '@material-ui/icons/Clear';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import HowToRegIcon from '@material-ui/icons/HowToReg';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -70,6 +64,7 @@ const rows = [
     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'key', numeric: false, disablePadding: false, label: 'Key' },
     { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
+    { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -203,17 +198,14 @@ class User extends Component {
     openDelete: false,
     edit: false,
     openAdd: false,
-<<<<<<< HEAD
-=======
-    userTypes: 'Admin',
->>>>>>> frontend_test1
     password: '',
     showPassword: false,
     data: [],
     userTypeData: [],
     openAddType: false,
-    loading: '',
     submitType_success: '',
+    idType: '',
+    typeData: [],
   };
 
   handleRequestSort = (event, property) => {
@@ -258,8 +250,23 @@ class User extends Component {
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
         dialogData : responseJSON.data[0],
+        idType : responseJSON.data[0].type,
         open: true, 
         scroll
+			});
+		  }
+    })
+
+    fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
+      method : 'POST',
+      body : JSON.stringify({id: this.state.idType})
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+        typeData : responseJSON.data[0],
 			});
 		  }
     })
@@ -286,10 +293,14 @@ class User extends Component {
   };
 
   handleOpenAdd = (text) => {
-    this.props.history.replace('/admin/user/update/' + text);
+    if(text === 'new') {
+      this.props.history.replace('/admin/user/' + text);
+    }
+    else {
+      this.props.history.replace('/admin/user/update/' + text);
+    }
   }
 
-<<<<<<< HEAD
   _handleDeleteButton = (id) => {
     if(!(id === '')){
         if(window.confirm("Delete this data?")){
@@ -325,48 +336,83 @@ class User extends Component {
     .catch(e=>console.log(e));  
   }
 
-=======
-  handleCloseAdd = () => {
-    this.setState({ openAdd: false, password: ''});
+  _handleActivationButton = (id,active) => {
+    if (active == true) {
+      if(!(id === '')){
+        if(window.confirm("Deactivate this user?")){
+            this._deactivatePayload(id);
+          }
+      }else{
+          window.alert('Can not deactivate, please check again');
+      }
+    } 
+    else {
+      this._activatePayload(id);  
+    }
   }
 
-  handleOpenAddType = () => {
-    this.setState({ openAddType: true});
+  _deactivatePayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/User/deactivate',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildActivatePayload(id),
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleClose();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
   }
 
-  handleCloseAddType = () => {
-    this.setState({ openAddType: false});
+  _activatePayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/User/activate',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildActivatePayload(id),
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleClose();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
   }
 
-  _handleSubmitButton=()=>{
-		if(!this._emptyChecker()){
-			if(window.confirm("Submit this data?")){
-				this._submitPayload();
-			}
-		}else{
-			window.alert('Form cannot be empty, please check again');
-		}
-		
+  _buildActivatePayload = (id) => {
+    var obj ={
+      id : id,
+      user : cookie.get('user_id'),
+    }
+    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
   }
 
-  _emptyChecker=()=>{
-		var empty = false;
-		switch(true){
-			case this['client_name'].value === '' :
-			case this['client_phone'].value === '':
-			case this['client_destination'].value === '':
-			case this['client_pick_up'].value === '':
-			case this['client_start_date'].value === '':
-			case this['client_finish_date'].value === '':
-			case this.state.busType === '':
-			case this['client_notes'].value === '':
-			return true;
-			default : return false;
-		}
-  }
 
->>>>>>> frontend_test1
   fetchData=()=>{
+    this.setState({loading : true});
     //get list all user
     fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
 		  method : 'POST'
@@ -375,10 +421,16 @@ class User extends Component {
 		  console.log(JSON.stringify(responseJSON.data))
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  data : responseJSON.data
-			});
-		  }
+        this.setState({
+          data : responseJSON.data,
+          loading : false,
+        });
+      }
+      else if (responseJSON.msg.toLowerCase() === 'empty') {
+        this.setState({
+          loading: false,
+        });
+      }
     });
 
     //get list user type
@@ -390,7 +442,7 @@ class User extends Component {
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
-			  userTypeData : responseJSON.data
+			  userTypeData : responseJSON.data,
 			});
 		  }
 		})
@@ -417,7 +469,7 @@ class User extends Component {
                 onRequestSort={this.handleRequestSort}
               />
               <TableBody>
-                {stableSort(data, getSorting(order, orderBy))
+                {data.length > 0 ?(stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((n,id) => {
                     return (
@@ -433,9 +485,10 @@ class User extends Component {
                         <TableCell>{n.name}</TableCell>
                         <TableCell>{n.key}</TableCell>
                         <TableCell>{n.type}</TableCell>
+                        <TableCell>{n.status==true? "active":"non-active"}</TableCell>
                       </TableRow>
                     );
-                  })}
+                  })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 49 * emptyRows }}>
                     <TableCell colSpan={6} />
@@ -467,7 +520,6 @@ class User extends Component {
             <DialogTitle id="scroll-dialog-title">User Data</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
-<<<<<<< HEAD
                 <List>
                   <ListItem>
                     <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
@@ -479,116 +531,19 @@ class User extends Component {
                     <ListItemText primary="Key" secondary={this.state.dialogData.key} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Type" secondary={this.state.dialogData.type} />
+                    <ListItemText primary="Type" secondary={this.state.typeData.name} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Status" secondary={this.state.dialogData.status==true ? "Active" : "Non-active"} />
                   </ListItem>
                 </List>
-=======
-                {
-                  ! this.state.edit ? (
-                    <List>
-                      <ListItem>
-                        <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Name" secondary={this.state.dialogData.name} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Key" secondary={this.state.dialogData.key} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Type" secondary={this.state.dialogData.type} />
-                      </ListItem>
-                    </List>
-                  ) : (
-                    <form>
-                      <TextField
-                      id="user-idnum"
-                      inputRef = {(input) => this['id'] = input}
-                      label="User ID Number"
-                      defaultValue={this.state.dialogData.id}
-                      fullWidth
-                      className={[classes.textField, classes.dense]}
-                      margin="dense"
-                      variant="outlined"
-                      />
-                      <TextField
-                        id="user-name"
-                        inputRef = {(input) => this['name'] = input}
-                        label="User Name"
-                        defaultValue={this.state.dialogData.name}
-                        fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
-                        variant="outlined"
-                      />
-                      <TextField
-                        id="user-key"
-                        inputRef = {(input) => this['key'] = input}
-                        label="User Key"
-                        defaultValue={this.state.dialogData.key}
-                        fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
-                        variant="outlined"
-                      />
-                      <TextField
-                        id="user-password"
-                        inputRef = {(input) => this['password'] = input}
-                        className={[(classes.dense, classes.textField)]}
-                        variant="outlined"
-                        type={this.state.showPassword ? 'text' : 'password'}
-                        label="User Password"
-                        fullWidth
-                        defaultValue={this.state.dialogData.password}
-                        value = {this.state.password}
-                        onChange={this.handleChange('password')}
-                        InputProps={{
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                aria-label="Toggle password visibility"
-                                onClick={this.handleClickShowPassword}
-                              >
-                                {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                      <TextField
-                        select
-                        inputRef = {(input) => this['type'] = input}
-                        label="User Type"
-                        className={[classes.textField, classes.dense]}
-                        value={this.state.userTypes}
-                        defaultValue={this.state.dialogData.type}
-                        onChange={this.handleChange('userTypes')}
-                        margin="dense"
-                        variant="outlined"
-                        fullWidth
-                        SelectProps={{
-                          MenuProps: {
-                          
-                          },
-                        }}
-                      >
-                        {this.state.userTypeData.map(option => (
-                          <MenuItem key={option.id} value={option.id}>
-                          {option.name}
-                          </MenuItem>
-                        ))}
-                      </TextField>
-                    </form>
-                  )
-                }
->>>>>>> frontend_test1
               </DialogContentText>
             </DialogContent>
             <DialogActions>
               <div>
-                <Button onClick={this.handleClose} color="primary" variant="contained" className={classes.button}>
-                  Deactivate
-                  <BlockIcon className={classes.rightIcon}/>
+                <Button onClick={()=>this._handleActivationButton(this.state.dialogData.id,this.state.dialogData.status)} color="primary" variant="contained" className={classes.button}>
+                {this.state.dialogData.status==true ? "Deactivate" : "Activate"}
+                {this.state.dialogData.status==true ?(<BlockIcon className={classes.rightIcon}/>): (<HowToRegIcon className={classes.rightIcon}/>)}
                 </Button>
                 <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
                   Edit
@@ -622,106 +577,25 @@ class User extends Component {
               </Button>
             </DialogActions>
           </Dialog>
-<<<<<<< HEAD
           <div>
             <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={()=>{this.handleOpenAdd('new')}}>
-=======
-          <Dialog
-            open={this.state.openAdd}
-            onClose={this.handleCloseAdd}
-            scroll={this.state.scroll}
-            aria-labelledby="scroll-dialog-title"
-            disableBackdropClick
-            disableEscapeKeyDown
-          >
-            <DialogTitle id="scroll-dialog-title">Create New User</DialogTitle>
-            <DialogContent style={{minWidth: '30vw'}}>
-              <DialogContentText>
-                <form>
-                  <TextField
-                    id="user-name"
-                    inputRef = {(input) => this['name'] = input}
-                    label="User Name"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                  <TextField
-                    id="user-key"
-                    inputRef = {(input) => this['key'] = input}
-                    label="User Key"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
-                    variant="outlined"
-                  />
-                  <TextField
-                    id="user-password"
-                    inputRef = {(input) => this['password'] = input}
-                    className={[(classes.dense, classes.textField)]}
-                    variant="outlined"
-                    type={this.state.showPassword ? 'text' : 'password'}
-                    label="User Password"
-                    fullWidth
-                    value={this.state.password}
-                    onChange={this.handleChange('password')}
-                    InputProps={{
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label="Toggle password visibility"
-                            onClick={this.handleClickShowPassword}
-                          >
-                            {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                  <TextField
-                    select
-                    inputRef = {(input) => this['type'] = input}
-                    label="User Type"
-                    className={[classes.textField, classes.dense]}
-                    value={this.state.userTypes}
-                    onChange={this.handleChange('userTypes')}
-                    margin="dense"
-                    variant="outlined"
-                    fullWidth
-                    SelectProps={{
-                      MenuProps: {
-                      
-                      },
-                    }}
-                  >
-                    {this.state.userTypeData.map(option => (
-                      <MenuItem key={option.id} value={option.id}>
-                      {option.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                </form>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button variant="contained" color="primary" onClick={this.handleCloseAdd} className={classes.button}>
-                Save
-                <SaveIcon style={styles.rightIcon} />
-              </Button>
-              <Button onClick={this.handleCloseAdd} color="secondary" variant="contained" className={classes.button}>
-                Cancel
-                <ClearIcon style={styles.rightIcon} />
-              </Button>
-            </DialogActions>
-          </Dialog>
-          <div>
-            <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
->>>>>>> frontend_test1
               <AddIcon />
             </Button>
           </div>
         </Paper>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={this.state.loading}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">Loading...</span>}
+        />
       </Grid>
     );
   }

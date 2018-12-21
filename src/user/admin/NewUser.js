@@ -157,7 +157,10 @@ class NewUser extends Component {
 					submit_success : true,
 					loading : false
                 });
-                this.handleBackButton();
+                setTimeout(
+                    this.handleBackButton(),
+                    6000
+                )
             }
 		})
 		.catch(e=>console.log(e));

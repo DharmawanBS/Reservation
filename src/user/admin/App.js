@@ -150,6 +150,12 @@ class App extends Component {
     if ( path === '/admin/' || path === '/admin') {
       nextState.title = 'Dashboard';
     }
+    else if (path.includes('/admin/order/')) {
+      nextState.title = 'Update Order';
+    }
+    else if (path.includes('/admin/user/')) {
+      nextState.title = 'User';
+    }
     else {
       var title = path.replace('/admin/','');
       nextState.title = title.charAt(0).toUpperCase() + title.slice(1);

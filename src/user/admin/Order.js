@@ -21,11 +21,9 @@ import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import moment from 'moment';
+import Snackbar from '@material-ui/core/Snackbar';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -33,10 +31,8 @@ import { withStyles } from '@material-ui/core/styles';
 //icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
-import BlockIcon from '@material-ui/icons/Block';
-import ClearIcon from '@material-ui/icons/Clear';
+import PrintIcon from '@material-ui/icons/Print';
 
 <<<<<<< HEAD
 //var
@@ -209,10 +205,8 @@ class Order extends Component {
     openAdd: false,
     data: [],
     idVehicle: '',
-    vehicleData: [],
     userVehicleData: [],
-    start_date : '',
-		end_date : '',
+    loading : true,
   };
 
   handleRequestSort = (event, property) => {
@@ -235,7 +229,7 @@ class Order extends Component {
   };
 
   handleClickOpen = (scroll,num) => () => {
-    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/read',{
       method : 'POST',
       body : JSON.stringify({id: num})
 		}).then(response => response.json())
@@ -292,32 +286,28 @@ class Order extends Component {
 
   fetchData=()=>{
     //get list all reservasi
-    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
-		  method : 'POST'
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/read',{
+      method : 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+      }
 		}).then(response => response.json())
 		.then(responseJSON => {
 		  console.log(JSON.stringify(responseJSON.data))
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  data : responseJSON.data
-			});
-		  }
+        this.setState({
+          data : responseJSON.data,
+          loading: false,
+        });
+      }
+      else if (responseJSON.msg.toLowerCase() === 'empty') {
+        this.setState({
+          loading: false,
+        });
+      }
     });
-    
-    //get list all vehicle
-    fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
-		  method : 'POST'
-		}).then(response => response.json())
-		.then(responseJSON => {
-		  console.log(JSON.stringify(responseJSON.data))
-		  let arr = [];
-		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  vehicleData : responseJSON.data
-			});
-		  }
-		})
   }
   
   _handleDeleteButton = (id) => {
@@ -334,7 +324,7 @@ class Order extends Component {
     this.setState({
         loading : true
     })
-    fetch('http://www.api.jakartabusrent.com/index.php/reservasi/delete',{
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/delete',{
         method : 'POST',
         headers: {
             'content-type': 'application/json',
@@ -353,6 +343,14 @@ class Order extends Component {
         }
     })
     .catch(e=>console.log(e));  
+  }
+
+  componentDidMount(){
+		this.fetchData();
+  }
+  
+  handlePrintButton = (id) => {
+    this.props.history.replace('http://www.api.jakartabusrent.com/index.php/reservation/print?id='+ id);
   }
 
   componentDidMount(){
@@ -376,7 +374,7 @@ class Order extends Component {
                 onRequestSort={this.handleRequestSort}
               />
               <TableBody>
-                {stableSort(data, getSorting(order, orderBy))
+                {data.length > 0 ?(stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((n,id) => {
                     return (
@@ -396,7 +394,7 @@ class Order extends Component {
                         <TableCell>{n.price}</TableCell>
                       </TableRow>
                     );
-                  })}
+                  })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 49 * emptyRows }}>
                     <TableCell colSpan={6} />
@@ -470,9 +468,9 @@ class Order extends Component {
             </DialogContent>
             <DialogActions>
               <div>
-                <Button onClick={this.handleClose} color="primary" variant="contained" className={classes.button}>
-                  Deactivate
-                  <BlockIcon className={classes.rightIcon}/>
+                <Button onClick={()=>this.handlePrintButton(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
+                  Print
+                  <PrintIcon className={classes.rightIcon}/>
                 </Button>
                 <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
                   Edit
@@ -512,6 +510,19 @@ class Order extends Component {
             </Button>
           </div>
         </Paper>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={this.state.loading}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">Loading...</span>}
+        />
       </Grid>
     );
   }

@@ -188,7 +188,10 @@ class UpdateOrder extends Component {
 					submit_success : true,
 					loading : false
                 });
-                this.handleBackButton();
+                setTimeout(
+                    this.handleBackButton(),
+                    1000
+                )
             }
 		})
 		.catch(e=>console.log(e));
@@ -271,7 +274,8 @@ class UpdateOrder extends Component {
             if(responseJSON.msg.toLowerCase() === 'ok'){
                 this.setState({
                     userVehicleData : responseJSON.data[0],
-                    loading : false
+                    loading : false,
+                    busTypes : responseJSON.data[0].id,
                 });
             }
         });
