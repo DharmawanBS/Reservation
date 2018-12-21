@@ -96,16 +96,25 @@ class Reservation extends Component {
 			var result = this.state.data.filter(obj => {
 				return obj.id === event.target.value
 			  })
-			  var mult = 1;
-			  if(this['client_start_date'].value !== '' && this['client_finish_date'].value !== ''){
-				let a = this['client_start_date'].value.split('T')[0], b = this['client_finish_date'].value.split('T')[0];
-				  mult = this.dateDiffInDays(new Date(a),new Date(b));
-			  }
 			  this.setState({
-				  price : result[0].price * mult
+				  raw_price : result[0].price
+			  },()=>{
+				this._calculatePrice();
 			  })
+			  
 		}
 	};
+
+	_calculatePrice=()=>{
+		var mult = 1;
+		if(this['client_start_date'].value !== '' && this['client_finish_date'].value !== ''){
+		let a = this['client_start_date'].value.split('T')[0], b = this['client_finish_date'].value.split('T')[0];
+			mult = this.dateDiffInDays(new Date(a),new Date(b));
+		}
+		this.setState({
+			price : this.state.raw_price * mult
+		})
+	}
 
 	dateDiffInDays(a, b) {
 		const _MS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -129,7 +138,8 @@ class Reservation extends Component {
 		submit_success : false,
 		loading : false,
 		start_date : (date + '').split('+')[0].slice(0,-3),
-		end_date : (date + '').split('+')[0].slice(0,-3)
+		end_date : (date + '').split('+')[0].slice(0,-3),
+		raw_price : 0
 	};
 
 	handleSave = () =>{
@@ -229,9 +239,14 @@ class Reservation extends Component {
 		return date.replace('T', ' ');
 	}
 
-	dateChecker=()=>{
+	dateChecker=(when,date)=>{
 		let start = moment(this.state.start_date);
 		let end = moment(this.state.end_date);
+		if(when === 'start'){
+			return moment(date).isBefore(end);
+		}else if(when === 'end'){
+			return moment(date).isAfter(start);
+		}
 		return start.isBefore(end);
 	}
 
@@ -328,11 +343,15 @@ class Reservation extends Component {
 							inputRef = {(input) => this['client_start_date'] = input}
 							value={this.state.start_date}
 							onChange={(e)=>{
-								this.setState({start_date : e.target.value},()=>{
-									if(!this.dateChecker()){
-									this.setState({end_date : this.state.start_date})
+								if(this.dateChecker('start',e.target.value)){
+									this.setState({start_date: e.target.value})
+								}else{
+									this.setState({
+										start_date : e.target.value,
+										end_date: e.target.value
+									})
 								}
-								})
+								this._calculatePrice();
 							}}
 							label="Starting Date"
 							type="datetime-local"
@@ -348,11 +367,15 @@ class Reservation extends Component {
 							inputRef = {(input) => this['client_finish_date'] = input}
 							value={this.state.end_date}
 							onChange={(e)=>{
-								this.setState({end_date : e.target.value},()=>{
-									if(!this.dateChecker()){
-									this.setState({start_date: this.state.end_date})
+								if(this.dateChecker('end',e.target.value)){
+									this.setState({end_date: e.target.value})
+								}else{
+									this.setState({
+										start_date : e.target.value,
+										end_date: e.target.value
+									})
 								}
-								})
+								this._calculatePrice();
 							}}
 							type="datetime-local"
 							style={styles.textField}

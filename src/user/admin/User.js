@@ -203,6 +203,10 @@ class User extends Component {
     openDelete: false,
     edit: false,
     openAdd: false,
+<<<<<<< HEAD
+=======
+    userTypes: 'Admin',
+>>>>>>> frontend_test1
     password: '',
     showPassword: false,
     data: [],
@@ -221,6 +225,18 @@ class User extends Component {
     }
 
     this.setState({ order, orderBy });
+  };
+
+  handleChange = name => event => {
+    this.setState({ [name]: event.target.value });
+  };
+
+  handleChangeType = event => {
+    this.setState({ userTypes: event.target.value});
+  }
+  
+  handleClickShowPassword = () => {
+    this.setState(state => ({ showPassword: !state.showPassword }));
   };
 
   handleChangePage = (event, page) => {
@@ -273,6 +289,7 @@ class User extends Component {
     this.props.history.replace('/admin/user/update/' + text);
   }
 
+<<<<<<< HEAD
   _handleDeleteButton = (id) => {
     if(!(id === '')){
         if(window.confirm("Delete this data?")){
@@ -308,6 +325,47 @@ class User extends Component {
     .catch(e=>console.log(e));  
   }
 
+=======
+  handleCloseAdd = () => {
+    this.setState({ openAdd: false, password: ''});
+  }
+
+  handleOpenAddType = () => {
+    this.setState({ openAddType: true});
+  }
+
+  handleCloseAddType = () => {
+    this.setState({ openAddType: false});
+  }
+
+  _handleSubmitButton=()=>{
+		if(!this._emptyChecker()){
+			if(window.confirm("Submit this data?")){
+				this._submitPayload();
+			}
+		}else{
+			window.alert('Form cannot be empty, please check again');
+		}
+		
+  }
+
+  _emptyChecker=()=>{
+		var empty = false;
+		switch(true){
+			case this['client_name'].value === '' :
+			case this['client_phone'].value === '':
+			case this['client_destination'].value === '':
+			case this['client_pick_up'].value === '':
+			case this['client_start_date'].value === '':
+			case this['client_finish_date'].value === '':
+			case this.state.busType === '':
+			case this['client_notes'].value === '':
+			return true;
+			default : return false;
+		}
+  }
+
+>>>>>>> frontend_test1
   fetchData=()=>{
     //get list all user
     fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
@@ -409,6 +467,7 @@ class User extends Component {
             <DialogTitle id="scroll-dialog-title">User Data</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
+<<<<<<< HEAD
                 <List>
                   <ListItem>
                     <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
@@ -423,6 +482,106 @@ class User extends Component {
                     <ListItemText primary="Type" secondary={this.state.dialogData.type} />
                   </ListItem>
                 </List>
+=======
+                {
+                  ! this.state.edit ? (
+                    <List>
+                      <ListItem>
+                        <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Name" secondary={this.state.dialogData.name} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Key" secondary={this.state.dialogData.key} />
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText primary="Type" secondary={this.state.dialogData.type} />
+                      </ListItem>
+                    </List>
+                  ) : (
+                    <form>
+                      <TextField
+                      id="user-idnum"
+                      inputRef = {(input) => this['id'] = input}
+                      label="User ID Number"
+                      defaultValue={this.state.dialogData.id}
+                      fullWidth
+                      className={[classes.textField, classes.dense]}
+                      margin="dense"
+                      variant="outlined"
+                      />
+                      <TextField
+                        id="user-name"
+                        inputRef = {(input) => this['name'] = input}
+                        label="User Name"
+                        defaultValue={this.state.dialogData.name}
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="user-key"
+                        inputRef = {(input) => this['key'] = input}
+                        label="User Key"
+                        defaultValue={this.state.dialogData.key}
+                        fullWidth
+                        className={[classes.textField, classes.dense]}
+                        margin="dense"
+                        variant="outlined"
+                      />
+                      <TextField
+                        id="user-password"
+                        inputRef = {(input) => this['password'] = input}
+                        className={[(classes.dense, classes.textField)]}
+                        variant="outlined"
+                        type={this.state.showPassword ? 'text' : 'password'}
+                        label="User Password"
+                        fullWidth
+                        defaultValue={this.state.dialogData.password}
+                        value = {this.state.password}
+                        onChange={this.handleChange('password')}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="Toggle password visibility"
+                                onClick={this.handleClickShowPassword}
+                              >
+                                {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
+                      />
+                      <TextField
+                        select
+                        inputRef = {(input) => this['type'] = input}
+                        label="User Type"
+                        className={[classes.textField, classes.dense]}
+                        value={this.state.userTypes}
+                        defaultValue={this.state.dialogData.type}
+                        onChange={this.handleChange('userTypes')}
+                        margin="dense"
+                        variant="outlined"
+                        fullWidth
+                        SelectProps={{
+                          MenuProps: {
+                          
+                          },
+                        }}
+                      >
+                        {this.state.userTypeData.map(option => (
+                          <MenuItem key={option.id} value={option.id}>
+                          {option.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </form>
+                  )
+                }
+>>>>>>> frontend_test1
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -463,8 +622,102 @@ class User extends Component {
               </Button>
             </DialogActions>
           </Dialog>
+<<<<<<< HEAD
           <div>
             <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={()=>{this.handleOpenAdd('new')}}>
+=======
+          <Dialog
+            open={this.state.openAdd}
+            onClose={this.handleCloseAdd}
+            scroll={this.state.scroll}
+            aria-labelledby="scroll-dialog-title"
+            disableBackdropClick
+            disableEscapeKeyDown
+          >
+            <DialogTitle id="scroll-dialog-title">Create New User</DialogTitle>
+            <DialogContent style={{minWidth: '30vw'}}>
+              <DialogContentText>
+                <form>
+                  <TextField
+                    id="user-name"
+                    inputRef = {(input) => this['name'] = input}
+                    label="User Name"
+                    fullWidth
+                    className={[classes.textField, classes.dense]}
+                    margin="dense"
+                    variant="outlined"
+                  />
+                  <TextField
+                    id="user-key"
+                    inputRef = {(input) => this['key'] = input}
+                    label="User Key"
+                    fullWidth
+                    className={[classes.textField, classes.dense]}
+                    margin="dense"
+                    variant="outlined"
+                  />
+                  <TextField
+                    id="user-password"
+                    inputRef = {(input) => this['password'] = input}
+                    className={[(classes.dense, classes.textField)]}
+                    variant="outlined"
+                    type={this.state.showPassword ? 'text' : 'password'}
+                    label="User Password"
+                    fullWidth
+                    value={this.state.password}
+                    onChange={this.handleChange('password')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="Toggle password visibility"
+                            onClick={this.handleClickShowPassword}
+                          >
+                            {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                  <TextField
+                    select
+                    inputRef = {(input) => this['type'] = input}
+                    label="User Type"
+                    className={[classes.textField, classes.dense]}
+                    value={this.state.userTypes}
+                    onChange={this.handleChange('userTypes')}
+                    margin="dense"
+                    variant="outlined"
+                    fullWidth
+                    SelectProps={{
+                      MenuProps: {
+                      
+                      },
+                    }}
+                  >
+                    {this.state.userTypeData.map(option => (
+                      <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </form>
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button variant="contained" color="primary" onClick={this.handleCloseAdd} className={classes.button}>
+                Save
+                <SaveIcon style={styles.rightIcon} />
+              </Button>
+              <Button onClick={this.handleCloseAdd} color="secondary" variant="contained" className={classes.button}>
+                Cancel
+                <ClearIcon style={styles.rightIcon} />
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <div>
+            <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
+>>>>>>> frontend_test1
               <AddIcon />
             </Button>
           </div>

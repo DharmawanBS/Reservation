@@ -96,6 +96,7 @@ class App extends Component {
             localizer={localizer}
             defaultDate={new Date()}
             defaultView="month"
+            showMultiDayTimes={true}
             events={this.state.events}
             style={{ height: "80vh" }}
           />
