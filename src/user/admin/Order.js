@@ -289,12 +289,17 @@ class Order extends Component {
 		  console.log(JSON.stringify(responseJSON.data))
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  data : responseJSON.data,
-        loading: false,
-			});
-		  }
-    })
+        this.setState({
+          data : responseJSON.data,
+          loading: false,
+        });
+      }
+      else if (responseJSON.msg.toLowerCase() === 'empty') {
+        this.setState({
+          loading: false,
+        });
+      }
+    });
   }
   
   _handleDeleteButton = (id) => {
@@ -361,7 +366,7 @@ class Order extends Component {
                 onRequestSort={this.handleRequestSort}
               />
               <TableBody>
-                {stableSort(data, getSorting(order, orderBy))
+                {data.length > 0 ?(stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((n,id) => {
                     return (
@@ -381,7 +386,7 @@ class Order extends Component {
                         <TableCell>{n.price}</TableCell>
                       </TableRow>
                     );
-                  })}
+                  })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 49 * emptyRows }}>
                     <TableCell colSpan={6} />

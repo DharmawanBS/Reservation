@@ -412,7 +412,12 @@ class User extends Component {
           data : responseJSON.data,
           loading : false,
         });
-		  }
+      }
+      else if (responseJSON.msg.toLowerCase() === 'empty') {
+        this.setState({
+          loading: false,
+        });
+      }
     });
 
     //get list user type
@@ -451,7 +456,7 @@ class User extends Component {
                 onRequestSort={this.handleRequestSort}
               />
               <TableBody>
-                {stableSort(data, getSorting(order, orderBy))
+                {data.length > 0 ?(stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((n,id) => {
                     return (
@@ -470,7 +475,7 @@ class User extends Component {
                         <TableCell>{n.status==true? "active":"non-active"}</TableCell>
                       </TableRow>
                     );
-                  })}
+                  })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
                 {emptyRows > 0 && (
                   <TableRow style={{ height: 49 * emptyRows }}>
                     <TableCell colSpan={6} />

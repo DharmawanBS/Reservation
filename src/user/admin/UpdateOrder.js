@@ -274,7 +274,8 @@ class UpdateOrder extends Component {
             if(responseJSON.msg.toLowerCase() === 'ok'){
                 this.setState({
                     userVehicleData : responseJSON.data[0],
-                    loading : false
+                    loading : false,
+                    busTypes : responseJSON.data[0].id,
                 });
             }
         });
