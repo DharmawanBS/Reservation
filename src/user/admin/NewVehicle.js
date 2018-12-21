@@ -90,7 +90,8 @@ export default class NewVehicle extends Component {
             body : this._buildObject()
         }).then(response => response.json())
         .then(responseJSON =>{
-            if(responseJSON.msg.toLowerCase() === 'ok'){
+            var status = responseJSON.msg.toLowerCase();
+            if(status === 'ok'){
                 this._submitSuccess();
                 this.props.closeDialog();
             }
@@ -168,7 +169,7 @@ export default class NewVehicle extends Component {
                           <DialogTitle id="alert-dialog-title">{"Submit this new vehicle data?"}</DialogTitle>
                           <DialogContent>
                             <DialogContentText id="alert-dialog-description">
-                                Make sure everything is correct
+                                Make sure everything is filled correctly
                             </DialogContentText>
                           </DialogContent>
                           <DialogActions>

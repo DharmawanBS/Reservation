@@ -23,6 +23,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
+import MenuItem from '@material-ui/core/MenuItem';
+import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Cookies from 'universal-cookie';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -34,12 +38,8 @@ import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
 import ClearIcon from '@material-ui/icons/Clear';
-
-let num = 0;
-function createData(idnum, name, address, total, last_resv) {
-    num += 1;
-    return { num, idnum, name, address, total, last_resv };
-}
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -66,12 +66,10 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-    { id: 'num', numeric: false, disablePadding: false, label: '#' },
-    { id: 'idnum', numeric: false, disablePadding: false, label: 'ID Number' },
+    { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
-    { id: 'address', numeric: false, disablePadding: false, label: 'Address' },
-    { id: 'total', numeric: false, disablePadding: false, label: 'Total' },
-    { id: 'last_resv', numeric: false, disablePadding: false, label: 'Last Reservation' },
+    { id: 'key', numeric: false, disablePadding: false, label: 'Key' },
+    { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -179,6 +177,10 @@ const styles = theme => ({
     bottom: '1vh',
     right: '2vw'
   },
+  addButtonBottom2: {
+    position: 'fixed',
+    bottom: '1vh',
+  },
   divRoot: {
     paddingBottom: '5vh',
   },
@@ -187,18 +189,12 @@ const styles = theme => ({
   }
 });
 
+const cookie = new Cookies();
+
 class User extends Component {
   state = {
     order: 'asc',
     orderBy: 'num',
-    data: [
-        createData('123456789', 'Adi Lalala', 'Jl. Mawar 1 Jakarta Pusat', 3, '05/06/2018'),
-        createData('112233445', 'Boni Yeyeye', 'Jl. Melati 2 Jakarta Barat', 1, '25/05/2018'),
-        createData('789456723', 'Citra Lololo', 'Jl. Kamboja 3 Jakarta Selatan', 2, '14/10/2018'),
-        createData('145683582', 'Deni Hahahaha', 'Jl. Sepatu 4 Jakarta Utara', 1, '09/03/2018'),
-        createData('673825146', 'Eka Yoyoyo', 'Jl. Tulip 5 Jakarta Timur', 4, '01/09/2018'),
-        createData('673941674', 'Feni Yayaya', 'Jl. Cemara 6 Bekasi', 1, '01/10/2018'),
-    ],
     page: 0,
     rowsPerPage: 5,
     open: false,
@@ -207,6 +203,14 @@ class User extends Component {
     openDelete: false,
     edit: false,
     openAdd: false,
+    userTypes: 'Admin',
+    password: '',
+    showPassword: false,
+    data: [],
+    userTypeData: [],
+    openAddType: false,
+    loading: '',
+    submitType_success: '',
   };
 
   handleRequestSort = (event, property) => {
@@ -220,6 +224,18 @@ class User extends Component {
     this.setState({ order, orderBy });
   };
 
+  handleChange = name => event => {
+    this.setState({ [name]: event.target.value });
+  };
+
+  handleChangeType = event => {
+    this.setState({ userTypes: event.target.value});
+  }
+  
+  handleClickShowPassword = () => {
+    this.setState(state => ({ showPassword: !state.showPassword }));
+  };
+
   handleChangePage = (event, page) => {
     this.setState({ page });
   };
@@ -228,8 +244,22 @@ class User extends Component {
     this.setState({ rowsPerPage: event.target.value });
   };
 
-  handleClickOpen = (scroll,rowData) => () => {
-    this.setState({ open: true, scroll, dialogData: rowData });
+  handleClickOpen = (scroll,num) => () => {
+    fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
+      method : 'POST',
+      body : JSON.stringify({id: num})
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+        dialogData : responseJSON.data[0],
+        open: true, 
+        scroll
+			});
+		  }
+    })
   };
 
   handleClose = () => {
@@ -257,8 +287,77 @@ class User extends Component {
   }
 
   handleCloseAdd = () => {
-    this.setState({ openAdd: false});
+    this.setState({ openAdd: false, password: ''});
   }
+
+  handleOpenAddType = () => {
+    this.setState({ openAddType: true});
+  }
+
+  handleCloseAddType = () => {
+    this.setState({ openAddType: false});
+  }
+
+  _handleSubmitButton=()=>{
+		if(!this._emptyChecker()){
+			if(window.confirm("Submit this data?")){
+				this._submitPayload();
+			}
+		}else{
+			window.alert('Form cannot be empty, please check again');
+		}
+		
+  }
+
+  _emptyChecker=()=>{
+		var empty = false;
+		switch(true){
+			case this['client_name'].value === '' :
+			case this['client_phone'].value === '':
+			case this['client_destination'].value === '':
+			case this['client_pick_up'].value === '':
+			case this['client_start_date'].value === '':
+			case this['client_finish_date'].value === '':
+			case this.state.busType === '':
+			case this['client_notes'].value === '':
+			return true;
+			default : return false;
+		}
+  }
+
+  fetchData=()=>{
+    //get list all user
+    fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  data : responseJSON.data
+			});
+		  }
+    });
+
+    //get list user type
+    fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  userTypeData : responseJSON.data
+			});
+		  }
+		})
+	}
+
+	componentDidMount(){
+		this.fetchData();
+	}
  
   render() {
     const { classes } = this.props;
@@ -285,16 +384,14 @@ class User extends Component {
                         hover
                         key={n.id}
                         padding= 'default'
-                        onClick={this.handleClickOpen('paper',n)}
+                        onClick={this.handleClickOpen('paper',n.id)}
                       >
                         <TableCell component="th" scope="row" padding="default">
-                          {n.num}
+                          {n.id}
                         </TableCell>
-                        <TableCell>{n.idnum}</TableCell>
                         <TableCell>{n.name}</TableCell>
-                        <TableCell>{n.address}</TableCell>
-                        <TableCell>{n.total}</TableCell>
-                        <TableCell>{n.last_resv}</TableCell>
+                        <TableCell>{n.key}</TableCell>
+                        <TableCell>{n.type}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -333,66 +430,97 @@ class User extends Component {
                   ! this.state.edit ? (
                     <List>
                       <ListItem>
-                        <ListItemText primary="ID Number" secondary={this.state.dialogData.idnum} />
+                        <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
                       </ListItem>
                       <ListItem>
                         <ListItemText primary="Name" secondary={this.state.dialogData.name} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Address" secondary={this.state.dialogData.address} />
+                        <ListItemText primary="Key" secondary={this.state.dialogData.key} />
                       </ListItem>
                       <ListItem>
-                        <ListItemText primary="Total" secondary={this.state.dialogData.total} />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemText primary="Last Reservation" secondary={this.state.dialogData.last_resv} />
+                        <ListItemText primary="Type" secondary={this.state.dialogData.type} />
                       </ListItem>
                     </List>
                   ) : (
                     <form>
                       <TextField
-                      id="client-idnum"
-                      label="Client ID Number"
-                      value={this.state.dialogData.idnum}
+                      id="user-idnum"
+                      inputRef = {(input) => this['id'] = input}
+                      label="User ID Number"
+                      defaultValue={this.state.dialogData.id}
                       fullWidth
                       className={[classes.textField, classes.dense]}
                       margin="dense"
                       variant="outlined"
                       />
                       <TextField
-                        id="client-name"
-                        label="Client Full Name"
-                        value={this.state.dialogData.name}
+                        id="user-name"
+                        inputRef = {(input) => this['name'] = input}
+                        label="User Name"
+                        defaultValue={this.state.dialogData.name}
                         fullWidth
                         className={[classes.textField, classes.dense]}
                         margin="dense"
                         variant="outlined"
                       />
                       <TextField
-                        id="client-address"
-                        label="Client Address"
-                        value={this.state.dialogData.address}
+                        id="user-key"
+                        inputRef = {(input) => this['key'] = input}
+                        label="User Key"
+                        defaultValue={this.state.dialogData.key}
                         fullWidth
                         className={[classes.textField, classes.dense]}
                         margin="dense"
                         variant="outlined"
                       />
                       <TextField
-                        id="client-email"
-                        label="Client Email"
-                        fullWidth
-                        className={[classes.textField, classes.dense]}
-                        margin="dense"
+                        id="user-password"
+                        inputRef = {(input) => this['password'] = input}
+                        className={[(classes.dense, classes.textField)]}
                         variant="outlined"
+                        type={this.state.showPassword ? 'text' : 'password'}
+                        label="User Password"
+                        fullWidth
+                        defaultValue={this.state.dialogData.password}
+                        value = {this.state.password}
+                        onChange={this.handleChange('password')}
+                        InputProps={{
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                aria-label="Toggle password visibility"
+                                onClick={this.handleClickShowPassword}
+                              >
+                                {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        }}
                       />
                       <TextField
-                        id="client-phoneNum"
-                        label="Client Phone Number"
-                        fullWidth
+                        select
+                        inputRef = {(input) => this['type'] = input}
+                        label="User Type"
                         className={[classes.textField, classes.dense]}
+                        value={this.state.userTypes}
+                        defaultValue={this.state.dialogData.type}
+                        onChange={this.handleChange('userTypes')}
                         margin="dense"
                         variant="outlined"
-                      />
+                        fullWidth
+                        SelectProps={{
+                          MenuProps: {
+                          
+                          },
+                        }}
+                      >
+                        {this.state.userTypeData.map(option => (
+                          <MenuItem key={option.id} value={option.id}>
+                          {option.name}
+                          </MenuItem>
+                        ))}
+                      </TextField>
                     </form>
                   )
                 }
@@ -456,51 +584,76 @@ class User extends Component {
             onClose={this.handleCloseAdd}
             scroll={this.state.scroll}
             aria-labelledby="scroll-dialog-title"
+            disableBackdropClick
+            disableEscapeKeyDown
           >
             <DialogTitle id="scroll-dialog-title">Create New User</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
                 <form>
                   <TextField
-                  id="client-idnum"
-                  label="Client ID Number"
-                  fullWidth
-                  className={[classes.textField, classes.dense]}
-                  margin="dense"
-                  variant="outlined"
-                  />
-                  <TextField
-                    id="client-name"
-                    label="Client Full Name"
+                    id="user-name"
+                    inputRef = {(input) => this['name'] = input}
+                    label="User Name"
                     fullWidth
                     className={[classes.textField, classes.dense]}
                     margin="dense"
                     variant="outlined"
                   />
                   <TextField
-                    id="client-address"
-                    label="Client Address"
+                    id="user-key"
+                    inputRef = {(input) => this['key'] = input}
+                    label="User Key"
                     fullWidth
                     className={[classes.textField, classes.dense]}
                     margin="dense"
                     variant="outlined"
                   />
                   <TextField
-                    id="client-email"
-                    label="Client Email"
-                    fullWidth
-                    className={[classes.textField, classes.dense]}
-                    margin="dense"
+                    id="user-password"
+                    inputRef = {(input) => this['password'] = input}
+                    className={[(classes.dense, classes.textField)]}
                     variant="outlined"
+                    type={this.state.showPassword ? 'text' : 'password'}
+                    label="User Password"
+                    fullWidth
+                    value={this.state.password}
+                    onChange={this.handleChange('password')}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            aria-label="Toggle password visibility"
+                            onClick={this.handleClickShowPassword}
+                          >
+                            {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    }}
                   />
                   <TextField
-                    id="client-phoneNum"
-                    label="Client Phone Number"
-                    fullWidth
+                    select
+                    inputRef = {(input) => this['type'] = input}
+                    label="User Type"
                     className={[classes.textField, classes.dense]}
+                    value={this.state.userTypes}
+                    onChange={this.handleChange('userTypes')}
                     margin="dense"
                     variant="outlined"
-                  />
+                    fullWidth
+                    SelectProps={{
+                      MenuProps: {
+                      
+                      },
+                    }}
+                  >
+                    {this.state.userTypeData.map(option => (
+                      <MenuItem key={option.id} value={option.id}>
+                      {option.name}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 </form>
               </DialogContentText>
             </DialogContent>
@@ -516,7 +669,7 @@ class User extends Component {
             </DialogActions>
           </Dialog>
           <div>
-            <Button variant="fab" color="primary" aria-label="Add" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
+            <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
               <AddIcon />
             </Button>
           </div>
