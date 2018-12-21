@@ -188,7 +188,10 @@ class UpdateOrder extends Component {
 					submit_success : true,
 					loading : false
                 });
-                this.handleBackButton();
+                setTimeout(
+                    this.handleBackButton(),
+                    1000
+                )
             }
 		})
 		.catch(e=>console.log(e));

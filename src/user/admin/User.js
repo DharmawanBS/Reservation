@@ -21,12 +21,9 @@ import Button from '@material-ui/core/Button';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
 import Cookies from 'universal-cookie';
+import Snackbar from '@material-ui/core/Snackbar';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -34,12 +31,9 @@ import { withStyles } from '@material-ui/core/styles';
 //icons
 import DeleteIcon from '@material-ui/icons/Delete';
 import CreateIcon from '@material-ui/icons/Create';
-import SaveIcon from '@material-ui/icons/Save';
 import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
-import ClearIcon from '@material-ui/icons/Clear';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import HowToRegIcon from '@material-ui/icons/HowToReg';
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -70,6 +64,7 @@ const rows = [
     { id: 'name', numeric: false, disablePadding: false, label: 'Name' },
     { id: 'key', numeric: false, disablePadding: false, label: 'Key' },
     { id: 'type', numeric: false, disablePadding: false, label: 'Type' },
+    { id: 'status', numeric: false, disablePadding: false, label: 'Status' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -208,8 +203,9 @@ class User extends Component {
     data: [],
     userTypeData: [],
     openAddType: false,
-    loading: '',
     submitType_success: '',
+    idType: '',
+    typeData: [],
   };
 
   handleRequestSort = (event, property) => {
@@ -242,8 +238,23 @@ class User extends Component {
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
         dialogData : responseJSON.data[0],
+        idType : responseJSON.data[0].type,
         open: true, 
         scroll
+			});
+		  }
+    })
+
+    fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
+      method : 'POST',
+      body : JSON.stringify({id: this.state.idType})
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+        typeData : responseJSON.data[0],
 			});
 		  }
     })
@@ -270,7 +281,12 @@ class User extends Component {
   };
 
   handleOpenAdd = (text) => {
-    this.props.history.replace('/admin/user/update/' + text);
+    if(text === 'new') {
+      this.props.history.replace('/admin/user/' + text);
+    }
+    else {
+      this.props.history.replace('/admin/user/update/' + text);
+    }
   }
 
   _handleDeleteButton = (id) => {
@@ -308,7 +324,82 @@ class User extends Component {
     .catch(e=>console.log(e));  
   }
 
+  _handleActivationButton = (id,active) => {
+    if (active == true) {
+      if(!(id === '')){
+        if(window.confirm("Deactivate this user?")){
+            this._deactivatePayload(id);
+          }
+      }else{
+          window.alert('Can not deactivate, please check again');
+      }
+    } 
+    else {
+      this._activatePayload(id);  
+    }
+  }
+
+  _deactivatePayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/User/deactivate',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildActivatePayload(id),
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleClose();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
+  }
+
+  _activatePayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/User/activate',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildActivatePayload(id),
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleClose();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
+  }
+
+  _buildActivatePayload = (id) => {
+    var obj ={
+      id : id,
+      user : cookie.get('user_id'),
+    }
+    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
+  }
+
   fetchData=()=>{
+    this.setState({loading : true});
     //get list all user
     fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
 		  method : 'POST'
@@ -317,9 +408,10 @@ class User extends Component {
 		  console.log(JSON.stringify(responseJSON.data))
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  data : responseJSON.data
-			});
+        this.setState({
+          data : responseJSON.data,
+          loading : false,
+        });
 		  }
     });
 
@@ -332,7 +424,7 @@ class User extends Component {
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
-			  userTypeData : responseJSON.data
+			  userTypeData : responseJSON.data,
 			});
 		  }
 		})
@@ -375,6 +467,7 @@ class User extends Component {
                         <TableCell>{n.name}</TableCell>
                         <TableCell>{n.key}</TableCell>
                         <TableCell>{n.type}</TableCell>
+                        <TableCell>{n.status==true? "active":"non-active"}</TableCell>
                       </TableRow>
                     );
                   })}
@@ -420,16 +513,19 @@ class User extends Component {
                     <ListItemText primary="Key" secondary={this.state.dialogData.key} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Type" secondary={this.state.dialogData.type} />
+                    <ListItemText primary="Type" secondary={this.state.typeData.name} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Status" secondary={this.state.dialogData.status==true ? "Active" : "Non-active"} />
                   </ListItem>
                 </List>
               </DialogContentText>
             </DialogContent>
             <DialogActions>
               <div>
-                <Button onClick={this.handleClose} color="primary" variant="contained" className={classes.button}>
-                  Deactivate
-                  <BlockIcon className={classes.rightIcon}/>
+                <Button onClick={()=>this._handleActivationButton(this.state.dialogData.id,this.state.dialogData.status)} color="primary" variant="contained" className={classes.button}>
+                {this.state.dialogData.status==true ? "Deactivate" : "Activate"}
+                {this.state.dialogData.status==true ?(<BlockIcon className={classes.rightIcon}/>): (<HowToRegIcon className={classes.rightIcon}/>)}
                 </Button>
                 <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
                   Edit
@@ -469,6 +565,19 @@ class User extends Component {
             </Button>
           </div>
         </Paper>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={this.state.loading}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">Loading...</span>}
+        />
       </Grid>
     );
   }
