@@ -203,10 +203,7 @@ class User extends Component {
     openDelete: false,
     edit: false,
     openAdd: false,
-<<<<<<< HEAD
-=======
     userTypes: 'Admin',
->>>>>>> frontend_test1
     password: '',
     showPassword: false,
     data: [],
@@ -289,43 +286,6 @@ class User extends Component {
     this.props.history.replace('/admin/user/update/' + text);
   }
 
-<<<<<<< HEAD
-  _handleDeleteButton = (id) => {
-    if(!(id === '')){
-        if(window.confirm("Delete this data?")){
-            this._deletePayload(id);
-        }
-    }else{
-        window.alert('Can not delete, please check again');
-    }
-  }
-
-  _deletePayload = (id) => {
-    this.setState({
-        loading : true
-    })
-    fetch('http://www.api.jakartabusrent.com/index.php/User/delete',{
-        method : 'POST',
-        headers: {
-            'content-type': 'application/json',
-            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-        },
-        body : JSON.stringify({id: id})
-    }).then(response => response.json())
-    .then(responseJSON =>{
-        if(responseJSON.msg.toLowerCase() === 'ok'){
-          this.setState({
-            submit_success : true,
-            loading : false,
-          });
-          this.handleCloseDelete();
-          this.fetchData();
-        }
-    })
-    .catch(e=>console.log(e));  
-  }
-
-=======
   handleCloseAdd = () => {
     this.setState({ openAdd: false, password: ''});
   }
@@ -365,7 +325,6 @@ class User extends Component {
 		}
   }
 
->>>>>>> frontend_test1
   fetchData=()=>{
     //get list all user
     fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
@@ -467,22 +426,6 @@ class User extends Component {
             <DialogTitle id="scroll-dialog-title">User Data</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
-<<<<<<< HEAD
-                <List>
-                  <ListItem>
-                    <ListItemText primary="ID Number" secondary={this.state.dialogData.id} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Name" secondary={this.state.dialogData.name} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Key" secondary={this.state.dialogData.key} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Type" secondary={this.state.dialogData.type} />
-                  </ListItem>
-                </List>
-=======
                 {
                   ! this.state.edit ? (
                     <List>
@@ -581,7 +524,6 @@ class User extends Component {
                     </form>
                   )
                 }
->>>>>>> frontend_test1
               </DialogContentText>
             </DialogContent>
             <DialogActions>
@@ -622,10 +564,6 @@ class User extends Component {
               </Button>
             </DialogActions>
           </Dialog>
-<<<<<<< HEAD
-          <div>
-            <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={()=>{this.handleOpenAdd('new')}}>
-=======
           <Dialog
             open={this.state.openAdd}
             onClose={this.handleCloseAdd}
@@ -717,7 +655,6 @@ class User extends Component {
           </Dialog>
           <div>
             <Button variant="fab" color="primary" aria-label="New User" className={classes.addButtonBottom} onClick={this.handleOpenAdd}>
->>>>>>> frontend_test1
               <AddIcon />
             </Button>
           </div>

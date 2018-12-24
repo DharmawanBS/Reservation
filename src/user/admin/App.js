@@ -50,6 +50,7 @@ import UserType from './UserType';
 import NewUser from './NewUser';
 import UpdateUser from './UpdateUser';
 import UpdateOrder from './UpdateOrder';
+import VehicleEdit from './VehicleEdit';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -355,6 +356,7 @@ class App extends Component {
               <Route exact path='/admin/user/new' component={NewUser}/>
               <Route exact path='/admin/user/update/:id' component={UpdateUser}/>
               <Route exact path='/admin/order/:id' component={UpdateOrder}/>
+              <Route exact path='/admin/vehicles/edit/:id' component={VehicleEdit}/>
             </Grid>
           </main>
         </div>

@@ -95,7 +95,8 @@ class Vehicle extends Component {
       search : '',
       data_search : [],
       no_data : false,
-      temp_pic : ''
+      temp_pic : '',
+      userTypes : []
   };
 
   constructor(props){
@@ -104,7 +105,23 @@ class Vehicle extends Component {
   }
 
   componentDidMount(){
+    this.fetchUserType();
     this.fetchData();
+  }
+
+  fetchUserType=()=>{
+    fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
+      method : 'POST'
+    }).then(response => response.json())
+    .then(responseJSON => {
+      const status = responseJSON.msg.toLowerCase();
+      const userTypes = responseJSON.data;
+      if(status === 'ok'){
+        this.setState({
+          userTypes
+        })
+      }
+    })
   }
 
   fetchData=()=>{
@@ -196,11 +213,21 @@ class Vehicle extends Component {
   }
 
   _handleEdit=(item_id)=>{
-    let arr = [...this.state.edit];
-    arr[arr.findIndex(item=>item.id === item_id)].edit_now=true;
-    this.setState({
-      edit : arr,
-      oldSpec : this.state.data[this.state.data.findIndex(item=>item.id === item_id)].feature
+    // let arr = [...this.state.edit];
+    // arr[arr.findIndex(item=>item.id === item_id)].edit_now=true;
+    // this.setState({
+    //   edit : arr,
+    //   oldSpec : this.state.data[this.state.data.findIndex(item=>item.id === item_id)].feature
+    // })
+    let dataId = this.state.data.findIndex((item) => item.id === item_id)
+    let vehicleData = this.state.data[dataId];
+    let userTypes = this.state.userTypes;
+    this.props.history.push({
+      pathname : this.props.location.pathname+'/edit/1',
+      state : {
+        vehicleData,
+        userTypes
+      }
     })
   }
 

@@ -15,24 +15,33 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 
 const localizer = Calendar.momentLocalizer(moment);
-const url = 'http://api.jakartabusrent.com/index.php/reservasi/print?id=';
+const url = 'http://api.jakartabusrent.com/index.php/reservation/print?id=';
 class App extends Component {
   state = {
     events: [],
     data : [],
     openDialog : false,
-    tempData : {}
+    tempData : {},
+    emptyData : false,
+    vehicleData : []
   };
+
+  getVehicleDetail=(vehicleId)=>{
+    return this.state.vehicleData.findIndex((item)=>item.id === vehicleId)
+  }
 
   _buildEvents=()=>{
     var arr =[];
     var data = this.state.data;
     let len = this.state.data.length;
     for(let x=0; x<len; x++){
+      let vehicleId = this.getVehicleDetail(data[x].vehicle);
+      let vehicleData = this.state.vehicleData[vehicleId];
+      console.log('MY ID : ' + vehicleId);
       arr.push({
         start : new Date(data[x].start),
         end : new Date(data[x].end),
-        title : data[x].type + ' ' + data[x].number + ' to ' + data[x].destination + ' by ' + data[x].name,
+        title : vehicleData.type + ' ' + vehicleData.number,
         id : data[x].id,
         booking : data[x].booking  
       })
@@ -40,11 +49,30 @@ class App extends Component {
     this.setState({events : arr});
   }
 
+  fetchVehicleData=()=>{
+    this.setState({
+			loading : true
+		})
+		fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  let arr = [];
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  vehicleData : responseJSON.data
+      });
+      this.fetchData();
+      }
+		})
+	  }
+
   fetchData=()=>{
     this.setState({
 			loading : true
 		})
-		fetch('http://www.api.jakartabusrent.com/index.php/reservasi/read',{
+		fetch('http://www.api.jakartabusrent.com/index.php/reservation/read',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -52,19 +80,24 @@ class App extends Component {
             },
         }).then(response => response.json())
         .then(responseJSON =>{
-            if(responseJSON.msg.toLowerCase() === 'ok'){
+          const status = responseJSON.msg.toLowerCase();
+            if(status === 'ok'){
                 this.setState({
-                  loading : false,
                   data : responseJSON.data
                 },()=>this._buildEvents());
                 
+            }else if(status === 'empty'){
+              this.setState({
+                emptyData : true
+              })
             }
+            this.setState({loading:false})
 		})
 		.catch(e=>console.log(e));
   }
 
   componentDidMount(){
-    this.fetchData();
+    this.fetchVehicleData();
   }
 
   _handleClick=(event)=>{
@@ -130,11 +163,23 @@ class App extends Component {
           }}
           open={this.state.loading}
           autoHideDuration={6000}
-          onClose={this.handleClose}
+          onClose={()=>this.setState({loading : false})}
           ContentProps={{
             'aria-describedby': 'message-id',
           }}
           message={<span id="message-id">Loading...</span>}
+        />
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={this.state.emptyData}
+          onClose={()=>this.setState({emptyData : false})}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">No Data</span>}
         />
       </Grid>
     );

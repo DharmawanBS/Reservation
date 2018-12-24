@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Cookies from 'universal-cookie';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import Grid from '@material-ui/core/Grid';
 import moment from 'moment';
 
 //icons
@@ -139,7 +140,8 @@ class Reservation extends Component {
 		loading : false,
 		start_date : (date + '').split('+')[0].slice(0,-3),
 		end_date : (date + '').split('+')[0].slice(0,-3),
-		raw_price : 0
+		raw_price : 0,
+		crewList : [""]
 	};
 
 	handleSave = () =>{
@@ -185,7 +187,7 @@ class Reservation extends Component {
 		this.setState({
 			loading : true
 		})
-		fetch('http://www.api.jakartabusrent.com/index.php/reservasi/reservasi',{
+		fetch('http://www.api.jakartabusrent.com/index.php/reservation/reservation',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -198,7 +200,9 @@ class Reservation extends Component {
                 this.setState({
 					submit_success : true,
 					loading : false
-				});
+				},()=>{setTimeout(()=>{
+					window.location.reload();
+				}, 1000)});
             }
 		})
 		.catch(e=>console.log(e));
@@ -250,17 +254,37 @@ class Reservation extends Component {
 		return start.isBefore(end);
 	}
 
+	spanNewCrew=()=>{
+		let crewList = [...this.state.crewList];
+		crewList.push('');
+		this.setState({crewList});
+	}
+
+	buildCrewList(){
+		let len = this.state.crewList.length;
+		let crewList = [];
+		for(let x=0; x<len; x++){
+			let name = this['crewName'+x].value;
+			let status = this['crewPosition'+x].value;
+			crewList.push({name,status});
+		}
+		console.log(JSON.stringify(crewList))
+		return crewList;
+	}
+
 	_buildPayload=()=>{
 		var obj ={
 			user : cookie.get('user_id'),
-			name : this['client_name'].value,
-			phone : this['client_phone'].value,
+			client_name : this['client_name'].value,
+			client_phone : this['client_phone'].value,
 			destination : this['client_destination'].value,
 			pick_up_location : this['client_pick_up'].value,
 			start : this.dateFormatter(this.state.start_date),
 			end : this.dateFormatter(this.state.end_date),
 			vehicle : this.state.busType,
 			notes : this['client_notes'].value,
+			price : this['price'].value,
+			crew : this.buildCrewList()
 		}
 		console.log(JSON.stringify(obj));
 		return JSON.stringify(obj);
@@ -431,6 +455,33 @@ class Reservation extends Component {
 							fullWidth
 							type='Number'
 						/>
+						{
+							this.state.crewList.map((item,id)=>(
+								<Grid container style={{flex:1}}>
+								<TextField
+									disabled={this.state.loading}
+									inputRef = {(input) => this['crewName'+id] = input}
+									label="Crew Name"
+									style={{flex:1}}
+									margin="normal"
+									variant="outlined"
+									fullWidth
+								/>
+								<TextField
+									disabled={this.state.loading}
+									inputRef = {(input) => this['crewPosition'+id] = input}
+									label="Crew Position"
+									style={{flex:1}}
+									margin="normal"
+									variant="outlined"
+									fullWidth
+								/>
+								</Grid>
+							))
+						}
+						<Button onClick={()=>this.spanNewCrew()}>
+							Add new Crew
+						</Button> 
 						<div style={{textAlign: 'right'}}>
 							<Button disabled={this.state.loading} variant="contained" color="primary" style={styles.button} onClick={()=>this._handleSubmitButton()}>
 								<SaveIcon style={styles.leftIcon} />

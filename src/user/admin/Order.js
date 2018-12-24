@@ -38,17 +38,11 @@ import AddIcon from '@material-ui/icons/Add';
 import BlockIcon from '@material-ui/icons/Block';
 import ClearIcon from '@material-ui/icons/Clear';
 
-<<<<<<< HEAD
-//var
-var date = moment(date).format();
-var util = require('util')
-=======
 var num = 0;
 function createData(idnum, name, start_date, end_date, price) {
     num += 1;
     return { num, idnum, name, start_date, end_date, price };
 }
->>>>>>> frontend_test1
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
