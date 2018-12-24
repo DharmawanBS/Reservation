@@ -124,7 +124,8 @@ class UpdateUser extends Component {
             if(responseJSON.msg.toLowerCase() === 'ok'){
                 this.setState({
                     data : responseJSON.data[0],
-                    loading: false
+                    loading: false,
+                    userTypes: responseJSON.data[0].type
                 });
             }
         })
@@ -142,8 +143,6 @@ class UpdateUser extends Component {
 		switch(true){
             case this.state.id === '':
 			case this['name'].value === '' :
-			case this['key'].value === '':
-			case this.state.password === '':
 			case this.state.userTypes === '':
 			return true;
 			default : return false;
@@ -179,7 +178,10 @@ class UpdateUser extends Component {
 					submit_success : true,
 					loading : false
                 });
-                this.handleBackButton();
+                setTimeout(
+                    this.handleBackButton(),
+                    1000
+                )
             }
 		})
 		.catch(e=>console.log(e));
@@ -190,8 +192,6 @@ class UpdateUser extends Component {
             id : this.state.id,
 			user : cookie.get('user_id'),
 			name : this['name'].value,
-			key : this['key'].value,
-			password : this.state.password,
 			type : this.state.userTypes,
 		}
 		console.log(JSON.stringify(obj));
@@ -222,42 +222,6 @@ class UpdateUser extends Component {
                                 className={[classes.textField, classes.dense]}
                                 margin="dense"
                                 variant="outlined"
-                            />
-                            <TextField
-                                id="user-key"
-                                disabled={this.state.loading}
-                                defaultValue={this.state.data.key}
-                                inputRef = {(input) => this['key'] = input}
-                                label="User Key"
-                                fullWidth
-                                className={[classes.textField, classes.dense]}
-                                margin="dense"
-                                variant="outlined"
-                            />
-                            <TextField
-                                id="user-password"
-                                disabled={this.state.loading}
-                                defaultValue={this.state.data.password}
-                                inputRef = {(input) => this['password'] = input}
-                                className={[(classes.dense, classes.textField)]}
-                                variant="outlined"
-                                type={this.state.showPassword ? 'text' : 'password'}
-                                label="User Password"
-                                fullWidth
-                                value={this.state.password}
-                                onChange={this.handleChange('password')}
-                                InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="Toggle password visibility"
-                                        onClick={this.handleClickShowPassword}
-                                    >
-                                        {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                    </InputAdornment>
-                                ),
-                                }}
                             />
                             <TextField
                                 select
