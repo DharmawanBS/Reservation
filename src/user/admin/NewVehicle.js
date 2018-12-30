@@ -1,22 +1,50 @@
-import React, { Component } from 'react';
+import React, { Component, createRef } from "react";
 import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import ExpansionPanel from '@material-ui/core/ExpansionPanel';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Button from '@material-ui/core/Button';
+import GridList from '@material-ui/core/GridList';
+import GridListTile from '@material-ui/core/GridListTile';
+import GridListTileBar from '@material-ui/core/GridListTileBar';
+import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Snackbar from '@material-ui/core/Snackbar';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import Tooltip from '@material-ui/core/Tooltip';
 import Cookies from 'universal-cookie';
+import moment from 'moment';
+
+//icons
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/DeleteOutline';
+import EditIcon from '@material-ui/icons/Edit';
+import CancelIcon from '@material-ui/icons/Cancel';
+import DoneIcon from '@material-ui/icons/Done';
+import ErrorIcon from '@material-ui/icons/Error';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import SearchIcon from '@material-ui/icons/Search';
+import InfoIcon from '@material-ui/icons/Info';
+import AddCircleIcon from '@material-ui/icons/AddCircle';
+import green from '@material-ui/core/colors/green';
+import amber from '@material-ui/core/colors/amber';
 
 const cookie = new Cookies();
-
+const date = new moment().format('YYYY-MM-DD');
 export default class NewVehicle extends Component {
 
     state={
         spec : [''],
         added : false,
-        dialog : false
+        dialog : false,
+        newFeature : [''],
+        loading : false
     }
 
     _spanNewTextfield=()=>{
@@ -97,91 +125,170 @@ export default class NewVehicle extends Component {
             }
         })
     }
+    spawnTitle(text, big=false){
+        return (
+          <Typography variant={big? 'h4' : 'h5'} id="simple-modal-description" style={{textAlign:'left', flex:0.5,marginBottom:8}}>
+              {text}
+          </Typography>
+        );
+      }
 
     render() {
+        const {newFeature} = this.state;
+        const {userTypes} = this.props;
 		return(
-			<Grid style={{flex:1}}>
+			<Grid container justify='center'>
+            <Paper style={{width:'90vw', padding:16}}>
                 <TextField
-                    inputRef={input => this['type'] = input}
-                    id="phone"
-                    label="Vehicle Type"
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
+                    inputRef = {(input) => this['vehicleType'] = input}
+                    label='Vehicle Type'
+                    margin='normal'
+                    variant='outlined'
+                    style={{flex:1}}
+                    disabled={this.state.loading}
+                    inputProps={{
+                    style : {fontSize : 25}
+                    }}
                 />
                 <TextField
-                    inputRef={input => this['number'] = input}
-                    id="phone"
-                    label="Plate Number"
-                    fullWidth
-                    margin="dense"
-                    variant="outlined"
+                    inputRef = {(input) => this['plateNumber'] = input}
+                    label='Plate Number'
+                    margin='normal'
+                    variant='outlined'
+                    style={{flex:1}}
+                    disabled={this.state.loading}
+                    inputProps={{
+                    style : {fontSize : 25}
+                    }}
                 />
-                <TextField
-                    inputRef={input => this['price'] = input}
-                    label="Price per Day"
-                    fullWidth
-                    type='number'
-                    margin="dense"
-                    variant="outlined"
-                />
-                {
-                    this.state.spec.map((item,id)=>(
-                        <Grid container>
-                        <TextField
-                            inputRef={input => this['feature'+id] = input}
-                            label="Feature"
-                            fullWidth
-                            margin="dense"
-                            variant="outlined"
-                            style={{flex:1}}
-                            autoFocus={id === this.state.spec.length-1 && this.state.added? true:false}
-                        />
-                        <TextField
-                        inputRef={input => this['amount'+id] = input}
-                            type='number'
-                            label="Amount"
-                            fullWidth
-                            style={{flex:0.3}}
-                            margin="dense"
-                            variant="outlined"
-                        />
-                        </Grid>
-                    ))
+                <Grid container direction='row'>
+                    <Grid item  style={{flex:1}}>
+                    {this.spawnTitle('Photos')}
+                    <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500, marginTop:16}}>
+                        <input type='file' ref={this.imagePickerRef} accept='image/*' style={{display:'none'}} onChange={(e)=>this._handleFilePicker(e)}/>
+                        <GridListTile key='icon' style={{height:100, width:100}}>
+                            <Tooltip title='Add New' placement='bottom'>
+                            <IconButton onClick={()=>this.imagePickerRef.current.click()}>
+                                <AddCircleIcon style={{fontSize:70}}/>
+                            </IconButton>
+                            </Tooltip>
+                        </GridListTile>
+                    </GridList>
+                    </Grid>
+                    <Grid item style={{flex:1, marginLeft:24}}>
+                    {this.spawnTitle('Features')}
+                    <Grid style={{textAlign:'center'}}>
+                        {
+                        newFeature.map((item,newFeatureId)=>(
+                            <Grid container>
+                            <TextField
+                                inputRef={(input)=>{this['newKey'+newFeatureId] = input}}
+                                defaultValue={item.key}
+                                label='Feature'
+                                margin='normal'
+                                variant="outlined"
+                                style={{flex:1}}
+                                disabled={this.state.loading}
+                            />
+                            <TextField
+                                inputRef={(input)=>{this['newValue'+newFeatureId] = input}}
+                                defaultValue={item.value}
+                                margin="normal"
+                                label='Amount'
+                                variant="outlined"
+                                type='number'
+                        style={{flex:0.5}}
+                        disabled={this.state.loading}
+                      />
+                      <IconButton style={{flex:0.15}} onClick={()=>this.deleteFeature(newFeatureId)}>
+                          <DeleteIcon style={{fontSize:'30'}}/>
+                        </IconButton>
+                    </Grid>
+                  ))
                 }
-                <div style={{textAlign:'right'}}>
-                    <Button style={{textAlign:'right'}} onClick={()=>this._spanNewTextfield()}>
-                        Add more
-                    </Button>
-                </div>
-                <Grid style={{textAlign:'right', marginTop:16}}>
-                    <Button variant='contained' color='primary' style={{marginRight:16}} onClick={()=>this._onSubmit()}>
-                        Submit
-                    </Button>
-                    <Button variant='contained' color='secondary' onClick={this.props.closeDialog}>
-                        Cancel
-                    </Button>
-                </Grid>
-                <Dialog
-                          open={this.state.dialog}
-                          onClose={()=>this._closeDialog()}
-                        >
-                          <DialogTitle id="alert-dialog-title">{"Submit this new vehicle data?"}</DialogTitle>
-                          <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
-                                Make sure everything is filled correctly
-                            </DialogContentText>
-                          </DialogContent>
-                          <DialogActions>
-                            <Button onClick={()=>this._closeDialog()} color="primary">
-                              No
-                            </Button>
-                            <Button onClick={()=>this._submitNewVehicle()} color="primary" autoFocus>
-                              Yes
-                            </Button>
-                          </DialogActions>
-                        </Dialog>
+                <Button onClick={()=>this.addNewFeatureClick()}>
+                  Add new Feature
+                </Button> 
+              </Grid>
             </Grid>
+          </Grid>
+          <Grid container style={{marginTop:16}}>
+            <Grid item style={{flex:1}}>
+              {this.spawnTitle('Prices')}
+              <TextField
+                value='Default Price'
+                label='Account Type'
+                margin="normal"
+                variant="outlined"
+                style={{flex:1}}
+                disabled={this.state.loading}
+              />
+              <TextField
+                inputRef={(input)=>{this['defaultPrice'] = input}}
+                margin="normal"
+                label='Price'
+                variant="outlined"
+                type='number'
+                style={{flex:1}}
+                disabled={this.state.loading}
+              />
+              <Grid style={{textAlign:'center'}}>
+                  {
+                    userTypes.map((item, id)=>(
+                      <Grid container>
+                      <TextField
+                        inputRef={(input)=>{this['userType'+id] = input}}
+                        value={item.name}
+                        label='Account Type'
+                        margin="normal"
+                        variant="outlined"
+                        style={{flex:1}}
+                        disabled={this.state.loading}
+                      />
+                      <TextField
+                        inputRef={(input)=>{this['newPrice'+id] = input}}
+                        margin="normal"
+                        label='Price'
+                        variant="outlined"
+                        type='number'
+                        style={{flex:0.5}}
+                        disabled={this.state.loading}
+                      />
+                      <TextField
+                        inputRef={(input)=>{this['startDate'+id] = input}}
+                        margin="normal"
+                        label='Starting Date'
+                        defaultValue = {date}
+                        variant="outlined"
+                        type='date'
+                        style={{flex:1}}
+                        disabled={this.state.loading}
+                        InputLabelProps={{
+                          shrink : true
+                        }}
+                      />
+                      </Grid>
+                    ))
+                  }
+              </Grid>
+            </Grid>
+            <Grid container style={{flex:1}} justify='flex-end' alignContent='flex-end' alignItems='flex-end' spacing={16}>
+              <Grid item>
+              <Button disabled={this.state.loading} variant='outlined' color='primary' onClick={()=>this.submitPayload()}>
+                SAVE
+                <DoneIcon style={{fontSize:15, marginLeft:8}}/>
+              </Button>
+              </Grid>
+              <Grid item>
+              <Button disabled={this.state.loading} variant='outlined' color='secondary' onClick={()=>this.cancelClick()}>
+                CANCEL
+                <CancelIcon style={{fontSize:15, marginLeft:8}}/>
+              </Button>
+              </Grid>
+            </Grid>
+          </Grid>
+          </Paper>
+      </Grid>
 		)
 	}
 }

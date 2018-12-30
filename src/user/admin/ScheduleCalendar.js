@@ -41,32 +41,14 @@ class App extends Component {
       arr.push({
         start : new Date(data[x].start),
         end : new Date(data[x].end),
-        title : vehicleData.type + ' ' + vehicleData.number,
+        title : data[x].code,
         id : data[x].id,
-        booking : data[x].booking  
+        reservation : data[x].client_name + ' from ' + data[x].pick_up_location + ' to ' + data[x].destination,
+        vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number  
       })
     }
     this.setState({events : arr});
   }
-
-  fetchVehicleData=()=>{
-    this.setState({
-			loading : true
-		})
-		fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
-		  method : 'POST'
-		}).then(response => response.json())
-		.then(responseJSON => {
-		  console.log(JSON.stringify(responseJSON.data))
-		  let arr = [];
-		  if(responseJSON.msg.toLowerCase() === 'ok'){
-			this.setState({
-			  vehicleData : responseJSON.data
-      });
-      this.fetchData();
-      }
-		})
-	  }
 
   fetchData=()=>{
     this.setState({
@@ -97,7 +79,7 @@ class App extends Component {
   }
 
   componentDidMount(){
-    this.fetchVehicleData();
+    this.fetchData();
   }
 
   _handleClick=(event)=>{
@@ -142,12 +124,13 @@ class App extends Component {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">{this.state.tempData.booking}</DialogTitle>
+          <DialogTitle id="alert-dialog-title">{this.state.tempData.title}</DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              Reservation {(this.state.tempData.title)}<br></br>
-              Start : {(this.state.tempData.start + '').split ('GMT')[0]} <br></br>
-              End : {(this.state.tempData.end + '').split('GMT')[0]}
+              Reservation by {(this.state.tempData.reservation)}<br />
+              Start : {(this.state.tempData.start + '').split ('GMT')[0]} <br />
+              End : {(this.state.tempData.end + '').split('GMT')[0]} <br />
+              Vehicle : {this.state.tempData.vehicle}
             </DialogContentText>
           </DialogContent>
           <DialogActions>

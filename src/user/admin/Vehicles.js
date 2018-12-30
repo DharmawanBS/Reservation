@@ -226,7 +226,8 @@ class Vehicle extends Component {
       pathname : this.props.location.pathname+'/edit/1',
       state : {
         vehicleData,
-        userTypes
+        userTypes,
+        locate : this.props.location.pathname
       }
     })
   }
@@ -374,40 +375,9 @@ class Vehicle extends Component {
                                     <img src={tile.img} alt={tile.title}/>
                                     <GridListTileBar
                                     title={tile.title}
-                                    actionIcon={
-                                      this.state.edit[this._checkEditNow(item.id)].edit_now?
-                                      (
-                                        <IconButton>
-                                          <DeleteIcon style={{color:'#FFF'}}/>
-                                        </IconButton>
-                                      )
-                                      :
-                                      null
-                                    }
                                     />
                                 </GridListTile>
                                 ))}
-                                {
-                                  this.state.temp_pic.length > 0?
-                                  <GridListTile style={{height:100, width:200}}>
-                                    <img src={this.state.temp_pic} alt='aa'/>
-                                  </GridListTile>
-                                  :
-                                  null
-                                }
-                                <input type='file' ref={this.imagePickerRef} accept='image/*' style={{display:'none'}} onChange={(e)=>this._handleFilePicker(e)}/>
-                                {
-                                  this.state.edit[this._checkEditNow(item.id)].edit_now?
-                                  <GridListTile key='icon' style={{height:100, width:100}}>
-                                    <Tooltip title='Add New' placement='bottom'>
-                                      <IconButton onClick={()=>this.imagePickerRef.current.click()}>
-                                        <AddCircleIcon style={{fontSize:70}}/>
-                                      </IconButton>
-                                    </Tooltip>
-                                  </GridListTile>
-                                  :
-                                  null
-                                }
                             </GridList>
                             <Grid style={{flex:0.5}}>
                             <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginBottom:8}}>
@@ -415,113 +385,39 @@ class Vehicle extends Component {
                             </Typography>
                             <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
                             {
-                              !this.state.edit[this._checkEditNow(item.id)].edit_now?
-                                item.feature.map((item,id)=>(
+                              item.feature.map((item,id)=>(
                                   <Grid container style={{textAlign:'left', flex:1, marginLeft:8,padding:8,fontWeight:'normal'}}>
                                   <Typography variant='subheading' style={{verticalAlign:'center'}}>
                                     {item.value} {item.key}
                                   </Typography>
                                   </Grid>
                                 ))
-                              :
-                              <Grid>
-                              {item.feature.map((item, feature_id)=>(
-                                <Grid container>
-                                <TextField
-                                  inputRef={(input)=>{this['key'+feature_id] = input}}
-                                  defaultValue={item.key}
-                                  label='Feature'
-                                  margin="normal"
-                                  variant="outlined"
-                                  style={{flex:1}}
-                                />
-                                <TextField
-                                  inputRef={(input)=>{this['value'+feature_id] = input}}
-                                  defaultValue={item.value}
-                                  margin="normal"
-                                  label='Amount'
-                                  variant="outlined"
-                                  type='number'
-                                  style={{flex:0.5}}
-                                />
-                                <IconButton style={{flex:0.3}} onClick={()=>this._handleDeleteSpec(item.id,feature_id)}>
-                                    <DeleteIcon style={{fontSize:'30'}}/>
-                                  </IconButton>
-                                </Grid>
-                              ))}
-                              <Button onClick={()=>{
-                                item.feature.push("")
-                                this.setState({data: this.state.data})
-                              }}>
-                                Add new
-                              </Button> 
-                              </Grid>
                             }
                             </Grid>
                             <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
                                 Price
                             </Typography>
-                            {
-                              this.state.edit[this._checkEditNow(item.id)].edit_now?
-                                <Grid container style={{flex:1}} alignItems='center'>
-                                <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
-                                  Rp.
-                                </Typography>
-                                <TextField
-                                  inputRef={input => this['price'+item.id] = input}
-                                  id="harga"
-                                  type='number'
-                                  defaultValue={item.price}
-                                  margin="normal"
-                                  variant="outlined"
-                                  style={{flex:1}}
-                                />
-                                <Typography variant="subtitle" style={{flex:0.2, verticalAlign:'center', height:'100%'}}>
-                                  / day
-                                </Typography>
-                                </Grid>
-                                :
-                                <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
-                                    Rp. {item.price} / day
-                                </Typography>
-                            }
+                            <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
+                                Rp. {item.price} / day
+                            </Typography>
                             </Grid>
                           </Grid>
                           <Grid style={{textAlign:'right', marginTop:8}}>
                             <Button variant='contained' color='secondary'
-                            onClick={()=>{
-                              if(window.confirm('Are you sure?')){
-                                this._handleDeleteData(item.id)
-                              }
-                            }}
-                            style={{marginRight:16}}>
+                              onClick={()=>{
+                                if(window.confirm('Are you sure?')){
+                                  this._handleDeleteData(item.id)
+                                }
+                              }}
+                              style={{marginRight:16}}>
                                 Delete
                                 <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
                               </Button>
-                            {
-                              this.state.edit[this._checkEditNow(item.id)].edit_now?
-                              <Button variant='outlined' color='primary' onClick={()=>{
-                                this._handleSave(item.feature,item.id);
-                                }
-                              }>
-                                SAVE
-                                <DoneIcon style={{fontSize:15, marginLeft:8}}/>
-                              </Button>
-                              :
-                              <Button variant='outlined' onClick={()=>this._handleEdit(item.id)}>
-                                EDIT
-                                <EditIcon style={{fontSize:15, marginLeft:8}}/>
-                              </Button>
-                            }
-                            {
-                              this.state.edit[this._checkEditNow(item.id)].edit_now?
-                              <Button style={{fontSize:15, marginLeft:8}} variant='outlined' color='secondary' onClick={()=>{this._handleCancel(item.id)}}>
-                                CANCEL
-                                <DoneIcon style={{fontSize:15, marginLeft:8}}/>
-                              </Button>
-                              :
-                              null
-                            }
+                           
+                            <Button variant='outlined' onClick={()=>this._handleEdit(item.id)}>
+                              EDIT
+                              <EditIcon style={{fontSize:15, marginLeft:8}}/>
+                            </Button>
                           </Grid>
                         </Grid>
                       </ExpansionPanelDetails>
@@ -532,10 +428,10 @@ class Vehicle extends Component {
                 <Button variant="fab" color="primary" aria-label="Add" style={{position:'fixed', right:'5%', bottom:'5%'}} onClick={()=>this.setState({dialog:true})}>
                     <AddIcon />
                 </Button>
-                <Dialog open={this.state.dialog} onClose={()=>this.setState({dialog : false})}>
+                <Dialog open={this.state.dialog} onClose={()=>this.setState({dialog : false})} maxWidth='lg'>
                   <Grid style={{padding:16}}>
                     <DialogTitle>New Vehicle</DialogTitle>
-                    <NewVehicle closeDialog={this._handleCloseDialog.bind(this)} successSubmit={this._newVehicleSuccess.bind(this)}/>
+                    <NewVehicle userTypes={this.state.userTypes} closeDialog={this._handleCloseDialog.bind(this)} successSubmit={this._newVehicleSuccess.bind(this)}/>
                   </Grid>
                 </Dialog>
                 <Snackbar
@@ -557,29 +453,6 @@ class Vehicle extends Component {
                         <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
                         <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
                           Added new vehicle
-                        </span>
-                    }
-                    />
-                </Snackbar>
-                <Snackbar
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'right',
-                  }}
-                  open={this.state.edit_success}
-                  autoHideDuration={6000}
-                  onClose={()=>this.setState({edit_success:false})}
-                  ContentProps={{
-                    'aria-describedby': 'message-id',
-                  }}
-                >
-                    <SnackbarContent
-                    aria-describedby="client-snackbar"
-                    style={{backgroundColor:green[600]}}
-                    message={
-                        <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
-                        <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
-                          Saved successfully
                         </span>
                     }
                     />
