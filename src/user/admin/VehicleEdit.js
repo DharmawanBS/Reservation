@@ -119,19 +119,13 @@ class VehicleEdit extends Component {
 
   buildPrices(){
     let len = this.props.location.state.userTypes.length;
-    let id = this.state.vehicleData.id;
-    let user = cookies.get('user_id');
-    let temp = [];
-    let pricesPayload = {};
+    let pricesPayload = [];
     for(let x=0; x<len; x++){
       let price = this['newPrice'+x].value;
       let start = this['startDate'+x].value;
-      let user_type = this.getUserTypeId(this['userType'+x].value);
-      temp.push({price,start,user_type})
+      let usertype = this.getUserTypeId(this['userType'+x].value);
+      pricesPayload.push({price,start,usertype})
     }
-    pricesPayload.id = id;
-    pricesPayload.user = user;
-    pricesPayload.prices = temp;
     console.log('aa ' + JSON.stringify(pricesPayload));
     return pricesPayload;
   }
@@ -145,11 +139,12 @@ class VehicleEdit extends Component {
     let number = this['plateNumber'].value;
     let price = this['defaultPrice'].value;
     let id = this.state.vehicleData.id;
+    let prices = this.buildPrices();
     payload.id = id;
     payload.user = user;
     payload.type = type;
     payload.number = number;
-    //payload.prices = prices;
+    payload.prices = prices;
     payload.price = price;
     payload.feature = feature;
     console.log(JSON.stringify(payload));
@@ -160,7 +155,6 @@ class VehicleEdit extends Component {
     this.setState({
       loading : true
     })
-    this.submitPricesPayload();
     const payload = JSON.stringify(this.buildPayloadObject());
     fetch('http://api.jakartabusrent.com/index.php/Vehicle/update',{
       method : 'POST',
@@ -169,32 +163,6 @@ class VehicleEdit extends Component {
         'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
       },
       body : payload
-    }).then(response => response.json())
-    .then(responseJSON =>{
-      var status = responseJSON.msg.toLowerCase();
-        if(status === 'ok'){
-          this.setState({
-            saved : true
-          },()=>{
-            setTimeout(()=>{
-              this.props.history.replace({
-                pathname : this.props.location.state.locate
-              })
-            },1000)
-          })
-        }
-    })
-  }
-
-  submitPricesPayload(){
-    let pricesPayload = JSON.stringify(this.buildPrices());
-    fetch('http://api.jakartabusrent.com/index.php/Vehicle/price',{
-      method : 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-      },
-      body : pricesPayload
     }).then(response => response.json())
     .then(responseJSON =>{
       var status = responseJSON.msg.toLowerCase();

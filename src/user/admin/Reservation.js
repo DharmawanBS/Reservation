@@ -12,6 +12,8 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Grid from '@material-ui/core/Grid';
 import moment from 'moment';
+import Autosuggest from 'react-autosuggest';
+import Popper from '@material-ui/core/Popper';
 
 //icons
 import SaveIcon from '@material-ui/icons/Save';
@@ -80,7 +82,30 @@ const types = [
 ];
 
 const cookie = new Cookies();
-
+// Imagine you have a list of languages that you'd like to autosuggest.
+ 
+  // Teach Autosuggest how to calculate suggestions for any given input value.
+  const getSuggestions = (value, all) => {
+	const inputValue = value.trim().toLowerCase();
+	const inputLength = inputValue.length;
+  
+	return inputLength === 0 ? [] : all.filter(lang =>
+	  lang.name.toLowerCase().slice(0, inputLength) === inputValue
+	);
+  };
+  
+  // When suggestion is clicked, Autosuggest needs to populate the input
+  // based on the clicked suggestion. Teach Autosuggest how to calculate the
+  // input value for every given suggestion.
+  const getSuggestionValue = suggestion => suggestion.name;
+  
+  // Use your imagination to render suggestions.
+  const renderSuggestion = suggestion => (
+	<MenuItem component="div">
+	  	{suggestion.name}
+    </MenuItem>
+  );
+  
 //class
 class Reservation extends Component {
 	handleChangeTextbox = name => event => {
@@ -141,7 +166,12 @@ class Reservation extends Component {
 		start_date : (date + '').split('+')[0].slice(0,-3),
 		end_date : (date + '').split('+')[0].slice(0,-3),
 		raw_price : 0,
-		crewList : [""]
+		crewList : [""],
+		value: '',
+		suggestions: [],
+		users : [],
+		userTypes : [],
+		createNewUser : false,
 	};
 
 	handleSave = () =>{
@@ -220,6 +250,12 @@ class Reservation extends Component {
 	}
 
 	fetchData=()=>{
+		let payload = {};
+		let start = this.dateFormatter(this.state.start_date);
+		let end = this.dateFormatter(this.state.end_date);
+		payload.start = start;
+		payload.end = end;
+		payload.is_free = 1;
 		fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
 		  method : 'POST'
 		}).then(response => response.json())
@@ -228,15 +264,45 @@ class Reservation extends Component {
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
-			  data : responseJSON.data
+			  data : responseJSON.data 
 			});
 		  }
 		})
 	  }
 
+	  fetchUsers=()=>{
+		fetch('http://www.api.jakartabusrent.com/index.php/User/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  users : responseJSON.data
+			});
+		  }
+		})
+		}
+		
+		fetchUserTypes=()=>{
+			fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
+		  method : 'POST'
+		}).then(response => response.json())
+		.then(responseJSON => {
+		  console.log(JSON.stringify(responseJSON.data))
+		  if(responseJSON.msg.toLowerCase() === 'ok'){
+			this.setState({
+			  userTypes : responseJSON.data
+			});
+		  }
+		})
+		}
+
 	componentDidMount(){
 		console.log(this.state.start_date);
 		this.fetchData();
+		this.fetchUsers();
+		this.fetchUserTypes();
 	}
 
 	dateFormatter=(date)=>{
@@ -290,46 +356,119 @@ class Reservation extends Component {
 		return JSON.stringify(obj);
 	}
 
+	onChange = (event, { newValue }) => {
+		this.setState({
+		  value: newValue
+		});
+	  };
+	
+	  // Autosuggest will call this function every time you need to update suggestions.
+	  // You already implemented this logic above, so just use it.
+	  onSuggestionsFetchRequested = ({ value }) => {
+		this.setState({
+		  suggestions: getSuggestions(value, this.state.users)
+		});
+	  };
+	
+	  // Autosuggest will call this function every time you need to clear suggestions.
+	  onSuggestionsClearRequested = () => {
+		this.setState({
+		  suggestions: []
+		});
+	  };
+	
+	  renderInputComponent(inputProps){
+		const { inputRef = () => {}, ref, ...other } = inputProps;
+		return (
+			<TextField
+			  fullWidth
+			  InputProps={{
+				inputRef: node => {
+				  ref(node);
+				  inputRef(node);
+				}
+			  }}
+			  label='Client Name'
+			  style={styles.textField}
+			  disabled={this.state.loading}
+			  margin="normal"
+			  variant="outlined"
+			  {...other}
+			/>
+		  );
+		}
+	
+		renderUserTypeField(){
+			if(this.state.createNewUser){
+				return (
+					<TextField
+						disabled={this.state.loading}
+						inputRef = {(input) => this['client_type'] = input}
+						select
+						label="Client Type"
+						style={styles.textField}
+						value={this.state.type}
+						onChange={this.handleChange('type')}
+						margin="normal"
+						variant="outlined"
+						fullWidth
+					>
+						{types.map(option => (
+							<MenuItem key={option.value} value={option.value}>
+							{option.label}
+							</MenuItem>
+						))}
+					</TextField>
+				);
+			}
+		}
+
 	render() {
 		//const { classes } = props;
+		const { value, suggestions } = this.state;
+		const inputProps = {
+			value,
+			onChange: this.onChange,
+			inputRef: node => {
+				this.popperNode = node;
+			  }
+		  };
 		return(
 			<div>
 				<Paper style={styles.root} elevation={1}>
 					<Typography variant="h4" gutterBottom style={styles.title}>New Reservation</Typography>
 					<form>
-						<TextField
-							inputRef = {(input) => this['client_name'] = input}
-							label="Client Name"
-							fullWidth
-							style={[styles.textField, styles.dense]}
-							onChange={this.handleChange('name')}
-							margin="dense"
-							variant="outlined"
-							disabled={this.state.loading}
-						/>
-						<TextField
-							disabled={this.state.loading}
-							inputRef = {(input) => this['client_type'] = input}
-							select
-							label="Client Type"
-							style={styles.textField}
-							value={this.state.type}
-							onChange={this.handleChange('type')}
-							SelectProps={{
-								MenuProps: {
-								
-								},
-							}}
-							margin="normal"
-							variant="outlined"
-							fullWidth
-						>
-							{types.map(option => (
-								<MenuItem key={option.value} value={option.value}>
-								{option.label}
-								</MenuItem>
-							))}
-						</TextField>
+					<Autosuggest
+						renderInputComponent = {(inputProps) => this.renderInputComponent(inputProps)}
+						suggestions={suggestions}
+						onSuggestionsFetchRequested={this.onSuggestionsFetchRequested}
+						onSuggestionsClearRequested={this.onSuggestionsClearRequested}
+						getSuggestionValue={getSuggestionValue}
+						renderSuggestion={renderSuggestion}
+						inputProps={inputProps}
+						theme={{
+							suggestionsList: {
+							margin: 0,
+							padding: 0,
+							listStyleType: 'none',
+						},
+							suggestion: {
+							display: 'block',
+						},
+						}}
+						renderSuggestionsContainer={options => (
+							<Popper anchorEl={this.popperNode} open={Boolean(options.children)}>
+							<Paper
+								square
+								{...options.containerProps}
+								style={{ width: this.popperNode ? this.popperNode.clientWidth : null }}
+							>
+								{options.children}
+							</Paper>
+							</Popper>
+						)}
+					/>
+						{this.renderUserTypeField()}
 						<TextField
 							disabled={this.state.loading}
 							inputRef = {(input) => this['client_phone'] = input}

@@ -47,89 +47,138 @@ export default class NewVehicle extends Component {
         loading : false
     }
 
-    _spanNewTextfield=()=>{
-        let arr = [...this.state.spec];
-        arr.push("");
-        this.setState({
-            spec : arr,
-            added : true
-        })
-    }
-
-    _getFeature=()=>{
-        var feature_temp = {};
-        let len = this.state.spec.length;
-        for(let x=0;x<len;x++){
-            let key = this['feature'+x].value;
-            let value = this['amount'+x].value;
-            feature_temp[key+''] = value;
-        }
-        return feature_temp;
-    }
-
-    _buildObject=()=>{
-        var object ={
-            user : cookie.get('user_id'),
-            type : this['type'].value,
-            number : this['number'].value,
-            feature : this._getFeature(),
-            price : this['price'].value
-        }
-        console.log(JSON.stringify(object));
-        return JSON.stringify(object);
-    }
-
-    _onSubmit=()=>{
-        if(!this._emptyChecker()){
-            this.setState({
-                dialog : true
-            })
-        }
-    }
-
-    _emptyChecker=()=>{
-        switch(true){
-            case this['type'].value === '' :
-            case this['number'].value === '' :
-            case this['price'].value === '':
-            return true;
-            default : return false;
-        }
-    }
-
-    _closeDialog=()=>{
-        this.setState({
-            dialog : false
-        })
-    }
-
-    _submitSuccess(){
-        this.props.successSubmit();
-    }
-
-    _submitNewVehicle=()=>{
-        this._closeDialog();
-        fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/insert',{
-            method : 'POST',
-            headers: {
-                'content-type': 'application/json',
-                'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
-            },
-            body : this._buildObject()
-        }).then(response => response.json())
-        .then(responseJSON =>{
-            var status = responseJSON.msg.toLowerCase();
-            if(status === 'ok'){
-                this._submitSuccess();
-                this.props.closeDialog();
-            }
-        })
-    }
     spawnTitle(text, big=false){
         return (
           <Typography variant={big? 'h4' : 'h5'} id="simple-modal-description" style={{textAlign:'left', flex:0.5,marginBottom:8}}>
               {text}
           </Typography>
+        );
+      }
+    
+      addNewFeatureClick=()=>{
+        let newFeature = [...this.state.newFeature];
+        newFeature.push('');
+        this.setState({newFeature});
+      }
+    
+      filterEmptySpaces(arr){
+        return arr.filter((item)=>(item.key !== null))
+      }
+    
+      getUserTypeId(userType){
+        let userTypes = this.props.userTypes;
+        let index = userTypes.findIndex((item)=>item.name.toLowerCase() === userType.toLowerCase());
+        return userTypes[index].id;
+      }
+    
+      buildFeature(){
+        let len = this.state.newFeature.length;
+        var temp = {};
+        for(let x=0; x<len; x++){
+          let key = this['newKey' + x].value + '';
+          let value = this['newValue' + x].value;
+          if(key === '') continue;
+          temp[key+'']=value;
+        }
+        return temp;
+      }
+    
+      buildPrices(){
+        let len = this.props.userTypes.length;
+        let pricesPayload = [];
+        for(let x=0; x<len; x++){
+          let price = this['newPrice'+x].value;
+          let start = this['startDate'+x].value;
+          let usertype = this.getUserTypeId(this['userType'+x].value);
+          pricesPayload.push({price,start,usertype})
+        }
+        console.log('aa ' + JSON.stringify(pricesPayload));
+        return pricesPayload;
+      }
+    
+      buildPayloadObject=()=>{
+        console.log(date);
+        let payload = {};
+        let feature = this.buildFeature();
+        let user = cookie.get('user_id');
+        let type = this['vehicleType'].value;
+        let number = this['plateNumber'].value;
+        let price = this['defaultPrice'].value;
+        let prices = this.buildPrices();
+        payload.user = user;
+        payload.type = type;
+        payload.number = number;
+        payload.prices = prices;
+        payload.price = price;
+        payload.feature = feature;
+        console.log(JSON.stringify(payload));
+        return payload;
+      }
+    
+      submitPayload(){
+        this.setState({
+          loading : true
+        })
+        const payload = JSON.stringify(this.buildPayloadObject());
+        fetch('http://api.jakartabusrent.com/index.php/Vehicle/insert',{
+          method : 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+          },
+          body : payload
+        }).then(response => response.json())
+        .then(responseJSON =>{
+          var status = responseJSON.msg.toLowerCase();
+            if(status === 'ok'){
+              this.setState({
+                saved : true
+              },()=>{
+                setTimeout(()=>{
+                  window.location.reload();
+                },1000)
+              })
+            }
+        })
+      }
+    
+      cancelClick(){
+        if(window.confirm('Are you sure want to discard changes and go back?')){
+          this.props.history.goBack();
+        }
+      }
+    
+      deleteFeature=(index)=>{
+        let newFeature = [...this.state.newFeature];
+        newFeature.splice(index,1);
+        this.setState({newFeature});
+      }
+    
+      showSnackbar(){
+        return (
+          <Snackbar
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            open={this.state.saved}
+            autoHideDuration={6000}
+            onClose={()=>this.setState({edit_success:false})}
+            ContentProps={{
+              'aria-describedby': 'message-id',
+            }}
+          >
+              <SnackbarContent
+              aria-describedby="client-snackbar"
+              style={{backgroundColor:green[600]}}
+              message={
+                  <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
+                  <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
+                    Saved successfully
+                  </span>
+              }
+              />
+          </Snackbar>
         );
       }
 
@@ -275,12 +324,12 @@ export default class NewVehicle extends Component {
             <Grid container style={{flex:1}} justify='flex-end' alignContent='flex-end' alignItems='flex-end' spacing={16}>
               <Grid item>
               <Button disabled={this.state.loading} variant='outlined' color='primary' onClick={()=>this.submitPayload()}>
-                SAVE
+                Submit
                 <DoneIcon style={{fontSize:15, marginLeft:8}}/>
               </Button>
               </Grid>
               <Grid item>
-              <Button disabled={this.state.loading} variant='outlined' color='secondary' onClick={()=>this.cancelClick()}>
+              <Button disabled={this.state.loading} variant='outlined' color='secondary' onClick={()=>this.props.closeDialog()}>
                 CANCEL
                 <CancelIcon style={{fontSize:15, marginLeft:8}}/>
               </Button>
