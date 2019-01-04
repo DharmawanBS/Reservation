@@ -24,15 +24,16 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Grid from '@material-ui/core/Grid';
 import moment from 'moment';
 import Snackbar from '@material-ui/core/Snackbar';
+import Cookies from 'universal-cookie';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
 
 //icons
-import DeleteIcon from '@material-ui/icons/Delete';
-import CreateIcon from '@material-ui/icons/Create';
+import ClearIcon from '@material-ui/icons/Clear';
 import AddIcon from '@material-ui/icons/Add';
 import PrintIcon from '@material-ui/icons/Print';
+import BlockIcon from '@material-ui/icons/Block'
 
 //var
 var date = moment(date).format();
@@ -64,11 +65,11 @@ function getSorting(order, orderBy) {
 
 const rows = [
     { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
-    { id: 'booking', numeric: false, disablePadding: false, label: 'Booking Number' },
-    { id: 'name', numeric: false, disablePadding: false, label: 'Client Name' },
+    { id: 'code', numeric: false, disablePadding: false, label: 'Code Number' },
+    { id: 'client_name', numeric: false, disablePadding: false, label: 'Client Name' },
     { id: 'start', numeric: false, disablePadding: false, label: 'Start Date' },
     { id: 'end', numeric: false, disablePadding: false, label: 'End Date' },
-    { id: 'price', numeric: false, disablePadding: false, label: 'Price' },
+    { id: 'is_approved', numeric: false, disablePadding: false, label: 'Approved' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -181,8 +182,36 @@ const styles = theme => ({
   },
   button: {
     marginRight: theme.spacing.unit,
+  },
+  cssRoot: {
+    borderRadius: theme.spacing.unit*3,
+    fontSize: theme.spacing.unit*1.2
+  },
+  cssNormal: {
+    backgroundColor:'#03a9f4',
+    color: 'white',
+    '&:hover' : {
+      backgroundColor:'#03a9f4',
+      color: 'white',
+    }
+  },
+  cssError: {
+    backgroundColor: '#b71c1c',
+    color: 'white',
+    '&:hover' : {
+      backgroundColor: '#b71c1c',
+      color: 'white',
+    }
+  },
+  cssApproved: {
+    backgroundColor:'#00e676',
+    '&:hover' : {
+      backgroundColor:'#00e676',
+    }
   }
 });
+
+const cookie = new Cookies();
 
 class Order extends Component {
   state = {
@@ -256,10 +285,6 @@ class Order extends Component {
     this.setState({ open: false });
   };
 
-  handleEdit = (text) => {
-    this.props.history.replace('/admin/order/' + text);
-  };
-
   handleClickCancel = () => {
     this.setState({ edit: false});
   };
@@ -316,13 +341,13 @@ class Order extends Component {
     this.setState({
         loading : true
     })
-    fetch('http://www.api.jakartabusrent.com/index.php/reservation/delete',{
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/cancel',{
         method : 'POST',
         headers: {
             'content-type': 'application/json',
             'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
         },
-        body : JSON.stringify({id: id})
+        body : this._buildRejectPayload(id)
     }).then(response => response.json())
     .then(responseJSON =>{
         if(responseJSON.msg.toLowerCase() === 'ok'){
@@ -337,12 +362,92 @@ class Order extends Component {
     .catch(e=>console.log(e));  
   }
 
+  handleReject = (id) => {
+    if(!(id === '')){
+      if(window.confirm("Reject this data?")){
+          this._rejectPayload(id);
+      }
+    }else{
+        window.alert('Can not delete, please check again');
+    }
+  };
+
+  _rejectPayload = (id) => {
+    this.setState({
+        loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/reject',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildRejectPayload(id)
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleCloseDelete();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));  
+  }
+
+  _buildRejectPayload = (id) => {
+    var obj ={
+      id : id,
+      user : cookie.get('user_id'),
+    }
+    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
+  }
+
+  _approvePayload = (id) => {
+    this.setState({
+      loading : true
+    })
+    fetch('http://www.api.jakartabusrent.com/index.php/reservation/approval',{
+        method : 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+        },
+        body : this._buildApprovePayload(id)
+    }).then(response => response.json())
+    .then(responseJSON =>{
+        if(responseJSON.msg.toLowerCase() === 'ok'){
+          this.setState({
+            submit_success : true,
+            loading : false,
+          });
+          this.handleCloseDelete();
+          this.fetchData();
+        }
+    })
+    .catch(e=>console.log(e));
+  }
+
+  _buildApprovePayload = (id) => {
+    var obj ={
+      id : id,
+      user : cookie.get('user_id'),
+      crew : '',
+    }
+    console.log(JSON.stringify(obj));
+    return JSON.stringify(obj);
+  }
+
   componentDidMount(){
 		this.fetchData();
   }
   
   handlePrintButton = (id) => {
-    this.props.history.replace('http://www.api.jakartabusrent.com/index.php/reservation/print?id='+ id);
+    var win = window.open('http://www.api.jakartabusrent.com/index.php/reservation/print?id='+id, '_blank');
+    win.focus();
   }
 
   componentDidMount(){
@@ -379,11 +484,11 @@ class Order extends Component {
                         <TableCell component="th" scope="row" padding="default">
                           {n.id}
                         </TableCell>
-                        <TableCell>{n.booking}</TableCell>
-                        <TableCell>{n.name}</TableCell>
+                        <TableCell>{n.code}</TableCell>
+                        <TableCell>{n.client_name}</TableCell>
                         <TableCell>{n.start}</TableCell>
                         <TableCell>{n.end}</TableCell>
-                        <TableCell>{n.price}</TableCell>
+                        <TableCell>{n.is_approved==null? (<Button size="small" variant="contained" className={[classes.cssRoot,classes.cssNormal]}>Not approved</Button>): (n.is_approved==true? (<Button size="small" variant="contained" className={[classes.cssRoot,classes.cssApproved]}>Approved</Button>): (<Button size="small" variant="contained" color="warning" className={[classes.cssRoot,classes.cssError]}>Reject</Button>))}</TableCell>
                       </TableRow>
                     );
                   })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
@@ -423,13 +528,13 @@ class Order extends Component {
                     <ListItemText primary="ID" secondary={this.state.dialogData.id} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Booking Number" secondary={this.state.dialogData.booking} />
+                    <ListItemText primary="Code Number" secondary={this.state.dialogData.code} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Client Name" secondary={this.state.dialogData.name} />
+                    <ListItemText primary="Client Name" secondary={this.state.dialogData.client_name} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Client Phone Number" secondary={this.state.dialogData.phone} />
+                    <ListItemText primary="Client Phone Number" secondary={this.state.dialogData.client_phone} />
                   </ListItem>
                   <ListItem>
                     <ListItemText primary="Destination" secondary={this.state.dialogData.destination} />
@@ -464,13 +569,13 @@ class Order extends Component {
                   Print
                   <PrintIcon className={classes.rightIcon}/>
                 </Button>
-                <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
-                  Edit
-                  <CreateIcon className={classes.rightIcon}/>
+                <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="secondary" variant="contained" className={classes.button}>
+                  Reject
+                  <BlockIcon className={classes.rightIcon}/>
                 </Button>
                 <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
-                  Delete
-                  <DeleteIcon className={classes.rightIcon} />
+                  Cancel
+                  <ClearIcon className={classes.rightIcon} />
                 </Button>
               </div>
             </DialogActions>
@@ -481,10 +586,10 @@ class Order extends Component {
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
-            <DialogTitle id="alert-dialog-title">Are you sure you want to delete record {this.state.dialogData.name} ?</DialogTitle>
+            <DialogTitle id="alert-dialog-title">Are you sure you want to cancel record {this.state.dialogData.client_name} ?</DialogTitle>
             <DialogContent>
               <DialogContentText id="alert-dialog-description">
-                Deleting this record means you can not access this record's data anymore.
+                Canceling this record means you can not access this record's data anymore.
               </DialogContentText>
             </DialogContent>
             <DialogActions>
