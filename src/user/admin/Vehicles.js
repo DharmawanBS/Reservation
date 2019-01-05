@@ -18,7 +18,9 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Tooltip from '@material-ui/core/Tooltip';
 import Cookies from 'universal-cookie';
-
+import Switch from '@material-ui/core/Switch';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 //icons
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import AddIcon from '@material-ui/icons/Add';
@@ -33,7 +35,44 @@ import InfoIcon from '@material-ui/icons/Info';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import green from '@material-ui/core/colors/green';
 import amber from '@material-ui/core/colors/amber';
-
+import moment from 'moment';
+var date = moment().format();
+const styles = {
+	root: {
+		padding: 8,
+		paddingLeft: 40,
+		paddingRight: 40,
+		width: '70vw',
+	},
+	textField: {
+		marginLeft: 8,
+		marginRight: 8,
+		marginTop: 16,
+		marginBottom: 16
+	},
+	dense: {
+		marginTop: 19,
+	},
+	title: {
+		textAlign: 'center'
+	},
+	formControl: {
+		minWidth: '100%',
+		marginBottom: 8,
+		marginTop: 8
+	},
+	selectEmpty: {
+		marginTop: 16,
+	},
+	button: {
+		marginTop: 16,
+		marginBottom: 8,
+		textAlign: 'right'
+	},
+	leftIcon: {
+		marginRight: 8,
+	},
+};
 const cookies = new Cookies();
 const tileData = [
     {
@@ -42,16 +81,6 @@ const tileData = [
       author: 'author',
     },
     {
-     img: "http://www.jakartabusrent.com/lampiran/home1.jpg",
-     title: 'Image',
-     author: 'author',
-   },
-   {
-     img: "http://www.jakartabusrent.com/lampiran/home1.jpg",
-     title: 'Image',
-     author: 'author',
-   },
-   {
      img: "http://www.jakartabusrent.com/lampiran/home1.jpg",
      title: 'Image',
      author: 'author',
@@ -96,7 +125,10 @@ class Vehicle extends Component {
       data_search : [],
       no_data : false,
       temp_pic : '',
-      userTypes : []
+      userTypes : [],
+      isFree : false,
+      start_date : (date + '').split('+')[0].slice(0,-3),
+		  end_date : (date + '').split('+')[0].slice(0,-3),
   };
 
   constructor(props){
@@ -344,7 +376,7 @@ class Vehicle extends Component {
             <Grid container justify='center' alignItems='center' style={{flex:1}}>
                 <Paper style={{paddingTop:0, padding:16, textAlign:'center', width:'85vw'}}>
                 <Grid style={{padding:8, marginBottom:8}} container alignItems="flex-end" justify='flex-end' >
-                  <Grid container style={{borderWidth:0.5,borderStyle:'solid', borderRadius:5, borderColor:'rgba(0,0,0,0.2)',height:50, width:250}} alignItems="center" justify='flex-start' >
+                <Grid container style={{borderWidth:0.5,borderStyle:'solid', borderRadius:5, borderColor:'rgba(0,0,0,0.2)',height:50, width:250}} alignItems="center" justify='flex-start' >
                     <Grid item onClick={()=>this['search'].focus()} style={{padding:8,borderWidth:0, borderRightWidth:0.5, borderStyle:'solid',borderColor:'rgba(0,0,0,0.2)'}}>
                         <SearchIcon style={{fontSize:25, verticalAlign:'center', color:'rgba(0,0,0,0.2)'}}/>
                       </Grid>

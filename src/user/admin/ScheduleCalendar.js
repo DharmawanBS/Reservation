@@ -13,6 +13,11 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import MenuItem from '@material-ui/core/MenuItem';
+import Menu from '@material-ui/core/Menu';
 
 const localizer = Calendar.momentLocalizer(moment);
 const url = 'http://api.jakartabusrent.com/index.php/reservation/print?id=';
@@ -23,7 +28,12 @@ class App extends Component {
     openDialog : false,
     tempData : {},
     emptyData : false,
-    vehicleData : []
+    vehicleData : [],
+    anchorEl: null,
+    selectedIndex: 0,
+    allVehicle : [],
+    vehicleList : [],
+    allEvents : []
   };
 
   getVehicleDetail=(vehicleId)=>{
@@ -47,7 +57,30 @@ class App extends Component {
         vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number  
       })
     }
-    this.setState({events : arr});
+    this.setState({events : arr, allEvents : arr});
+  }
+
+  fetchVehicle=()=>{
+    fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
+      method : 'POST'
+    }).then(response => response.json())
+    .then(responseJSON => {
+      console.log(JSON.stringify(responseJSON.data))
+      let arr = [];
+      if(responseJSON.msg.toLowerCase() === 'ok'){
+        this.setState({
+          allVehicle : responseJSON.data,
+        });
+        let vehicleList = [];
+        for(let x=0;x<responseJSON.data.length;x++){
+          vehicleList.push(responseJSON.data[x].type + ' ' + responseJSON.data[x].number);
+        }
+        this.setState({
+          loading : false,
+          vehicleList
+        })
+      }
+    })
   }
 
   fetchData=()=>{
@@ -65,7 +98,7 @@ class App extends Component {
           const status = responseJSON.msg.toLowerCase();
             if(status === 'ok'){
                 this.setState({
-                  data : responseJSON.data
+                  data : responseJSON.data,
                 },()=>this._buildEvents());
                 
             }else if(status === 'empty'){
@@ -80,6 +113,7 @@ class App extends Component {
 
   componentDidMount(){
     this.fetchData();
+    this.fetchVehicle();
   }
 
   _handleClick=(event)=>{
@@ -101,11 +135,60 @@ class App extends Component {
     var win = window.open(url+this.state.tempData.id, '_blank');
     win.focus();
   }
+  handleClickListItem = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
+
+  handleMenuItemClick = (event, index, options) => {
+    this.setState({events:[]})
+    let allEvents = this.state.allEvents;
+    let filtered = allEvents.filter((item)=>(item.vehicle === options[index]));
+    if(index === 0)this.setState({ selectedIndex: index, anchorEl: null , events : this.state.allEvents});
+    else this.setState({ selectedIndex: index, anchorEl: null , events : filtered});
+  };
+
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  };
 
   render() {
+    const options = [
+      'Show all schedule', ...this.state.vehicleList
+    ];
+    const { anchorEl } = this.state;
     return (
       <Grid justify='center' alignItems='center' style={{flex:1}}>
         <Paper style={{margin:8, padding:16}}>
+        <List component="nav">
+          <ListItem
+            button
+            aria-haspopup="true"
+            aria-controls="lock-menu"
+            aria-label="When device is locked"
+            onClick={this.handleClickListItem}
+          >
+            <ListItemText
+              primary="Show : "
+              secondary={options[this.state.selectedIndex]}
+            />
+          </ListItem>
+        </List>
+        <Menu
+          id="lock-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={this.handleClose}
+        >
+          {options.map((option, index) => (
+            <MenuItem
+              key={option}
+              selected={index === this.state.selectedIndex}
+              onClick={event => this.handleMenuItemClick(event, index,options)}
+            >
+              {option}
+            </MenuItem>
+          ))}
+        </Menu>
           <Calendar
             onSelectEvent={(event)=>this._handleClick(event)}
             localizer={localizer}
