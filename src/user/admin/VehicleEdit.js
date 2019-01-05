@@ -75,8 +75,10 @@ class VehicleEdit extends Component {
   state = {
     newFeature : this.props.location.state.vehicleData.feature,
     startDate : date,
-    newPrices : []
-
+    newPrices : this.props.location.state.vehicleData.prices,
+    vehicleData : this.props.location.state.vehicleData,
+    userTypes : this.props.location.state.userTypes,
+    loading : false
   };
 
   spawnTitle(text, big=false){
@@ -105,29 +107,27 @@ class VehicleEdit extends Component {
 
   buildFeature(){
     let len = this.state.newFeature.length;
-    var temp = [];
+    var temp = {};
     for(let x=0; x<len; x++){
-      let key = this['newKey' + x].value;
+      let key = this['newKey' + x].value + '';
       let value = this['newValue' + x].value;
       if(key === '') continue;
-      let obj = {
-        key, value
-      }
-      temp.push(obj);
+      temp[key+'']=value;
     }
     return temp;
   }
 
   buildPrices(){
     let len = this.props.location.state.userTypes.length;
-    var temp = [];
+    let pricesPayload = [];
     for(let x=0; x<len; x++){
       let price = this['newPrice'+x].value;
       let start = this['startDate'+x].value;
-      let user_type = this.getUserTypeId(this['userType'+x].value);
-      temp.push({price,start,user_type})
+      let usertype = this.getUserTypeId(this['userType'+x].value);
+      pricesPayload.push({price,start,usertype})
     }
-    return temp;
+    console.log('aa ' + JSON.stringify(pricesPayload));
+    return pricesPayload;
   }
 
   buildPayloadObject=()=>{
@@ -137,13 +137,47 @@ class VehicleEdit extends Component {
     let user = cookies.get('user_id');
     let type = this['vehicleType'].value;
     let number = this['plateNumber'].value;
+    let price = this['defaultPrice'].value;
+    let id = this.state.vehicleData.id;
     let prices = this.buildPrices();
+    payload.id = id;
     payload.user = user;
     payload.type = type;
     payload.number = number;
     payload.prices = prices;
+    payload.price = price;
     payload.feature = feature;
     console.log(JSON.stringify(payload));
+    return payload;
+  }
+
+  submitPayload(){
+    this.setState({
+      loading : true
+    })
+    const payload = JSON.stringify(this.buildPayloadObject());
+    fetch('http://api.jakartabusrent.com/index.php/Vehicle/update',{
+      method : 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+      },
+      body : payload
+    }).then(response => response.json())
+    .then(responseJSON =>{
+      var status = responseJSON.msg.toLowerCase();
+        if(status === 'ok'){
+          this.setState({
+            saved : true
+          },()=>{
+            setTimeout(()=>{
+              this.props.history.replace({
+                pathname : this.props.location.state.locate
+              })
+            },1000)
+          })
+        }
+    })
   }
 
   cancelClick(){
@@ -161,20 +195,48 @@ class VehicleEdit extends Component {
   getPrice=(userTypesId)=>{
     let vehicleData = this.props.location.state.vehicleData;
     let defaultPrice = vehicleData.price;
-    let pricesData = vehicleData.prices;
+    let pricesData = null;
+    if(vehicleData.prices !== null) pricesData = vehicleData.prices;
 
     if(pricesData === null){
       return defaultPrice;
     }else{
-      const id = pricesData.findIndex((item)=> item.id === userTypesId);
+      const id = pricesData.findIndex((item)=> item.type_id === userTypesId);
       return pricesData[id].price;
     }
 
   }
 
+  showSnackbar(){
+    return (
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        open={this.state.saved}
+        autoHideDuration={6000}
+        onClose={()=>this.setState({edit_success:false})}
+        ContentProps={{
+          'aria-describedby': 'message-id',
+        }}
+      >
+          <SnackbarContent
+          aria-describedby="client-snackbar"
+          style={{backgroundColor:green[600]}}
+          message={
+              <span id="client-snackbar" style={{display: 'flex',alignItems: 'center',}}>
+              <CheckCircleIcon style={{fontSize:20, opacity:0.9, marginRight:8}}/>
+                Saved successfully
+              </span>
+          }
+          />
+      </Snackbar>
+    );
+  }
+
   render() {
-    const {vehicleData,userTypes}  = this.props.location.state,
-          newFeature   = this.state.newFeature;
+    const {vehicleData,userTypes, newFeature}  = this.state;
     return (
       <Grid container justify='center'>
         <Paper style={{width:'90vw', padding:16}}>
@@ -185,6 +247,7 @@ class VehicleEdit extends Component {
             margin='normal'
             variant='outlined'
             style={{flex:1}}
+            disabled={this.state.loading}
             inputProps={{
               style : {fontSize : 25}
             }}
@@ -196,6 +259,7 @@ class VehicleEdit extends Component {
             margin='normal'
             variant='outlined'
             style={{flex:1}}
+            disabled={this.state.loading}
             inputProps={{
               style : {fontSize : 25}
             }}
@@ -240,6 +304,7 @@ class VehicleEdit extends Component {
                         margin='normal'
                         variant="outlined"
                         style={{flex:1}}
+                        disabled={this.state.loading}
                       />
                       <TextField
                         inputRef={(input)=>{this['newValue'+newFeatureId] = input}}
@@ -249,6 +314,7 @@ class VehicleEdit extends Component {
                         variant="outlined"
                         type='number'
                         style={{flex:0.5}}
+                        disabled={this.state.loading}
                       />
                       <IconButton style={{flex:0.15}} onClick={()=>this.deleteFeature(newFeatureId)}>
                           <DeleteIcon style={{fontSize:'30'}}/>
@@ -271,6 +337,7 @@ class VehicleEdit extends Component {
                 margin="normal"
                 variant="outlined"
                 style={{flex:1}}
+                disabled={this.state.loading}
               />
               <TextField
                 inputRef={(input)=>{this['defaultPrice'] = input}}
@@ -280,6 +347,7 @@ class VehicleEdit extends Component {
                 variant="outlined"
                 type='number'
                 style={{flex:1}}
+                disabled={this.state.loading}
               />
               <Grid style={{textAlign:'center'}}>
                   {
@@ -292,6 +360,7 @@ class VehicleEdit extends Component {
                         margin="normal"
                         variant="outlined"
                         style={{flex:1}}
+                        disabled={this.state.loading}
                       />
                       <TextField
                         inputRef={(input)=>{this['newPrice'+id] = input}}
@@ -301,6 +370,7 @@ class VehicleEdit extends Component {
                         variant="outlined"
                         type='number'
                         style={{flex:0.5}}
+                        disabled={this.state.loading}
                       />
                       <TextField
                         inputRef={(input)=>{this['startDate'+id] = input}}
@@ -310,6 +380,7 @@ class VehicleEdit extends Component {
                         variant="outlined"
                         type='date'
                         style={{flex:1}}
+                        disabled={this.state.loading}
                         InputLabelProps={{
                           shrink : true
                         }}
@@ -321,24 +392,13 @@ class VehicleEdit extends Component {
             </Grid>
             <Grid container style={{flex:1}} justify='flex-end' alignContent='flex-end' alignItems='flex-end' spacing={16}>
               <Grid item>
-               <Button variant='contained' color='secondary'
-                onClick={()=>{
-                  if(window.confirm('Are you sure?')){
-                    
-                  }
-                }}>
-                    Delete
-                    <DeleteIcon style={{fontSize:15, marginLeft:8}}/>
-                  </Button>
-              </Grid>
-              <Grid item>
-              <Button variant='outlined' color='primary' onClick={()=>this.buildPayloadObject()}>
+              <Button disabled={this.state.loading} variant='outlined' color='primary' onClick={()=>this.submitPayload()}>
                 SAVE
                 <DoneIcon style={{fontSize:15, marginLeft:8}}/>
               </Button>
               </Grid>
               <Grid item>
-              <Button variant='outlined' color='secondary' onClick={()=>this.cancelClick()}>
+              <Button disabled={this.state.loading} variant='outlined' color='secondary' onClick={()=>this.cancelClick()}>
                 CANCEL
                 <CancelIcon style={{fontSize:15, marginLeft:8}}/>
               </Button>
@@ -346,6 +406,7 @@ class VehicleEdit extends Component {
             </Grid>
           </Grid>
         </Paper>
+        {this.showSnackbar()}
       </Grid>
     );
   }
