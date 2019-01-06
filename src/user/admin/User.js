@@ -187,7 +187,7 @@ const cookie = new Cookies();
 class User extends Component {
   state = {
     order: 'asc',
-    orderBy: 'num',
+    orderBy: 'id',
     page: 0,
     rowsPerPage: 5,
     open: false,
@@ -448,7 +448,15 @@ class User extends Component {
 
 	componentDidMount(){
 		this.fetchData();
-	}
+  }
+  
+  statusInTable = (active) => {
+    if (active==true) {
+      return (<Button size="small" variant="contained" style={{backgroundColor:'#00e676', borderRadius: 24, fontSize: 8*1.2, }}>Active</Button>)
+    } else {
+      return (<Button size="small" variant="contained" style={{backgroundColor: '#b71c1c',color: 'white',borderRadius: 24, fontSize: 8*1.2,}}>Not active</Button>);
+    }
+  }
  
   render() {
     const { classes } = this.props;
@@ -483,7 +491,7 @@ class User extends Component {
                         <TableCell>{n.name}</TableCell>
                         <TableCell>{n.key}</TableCell>
                         <TableCell>{n.type}</TableCell>
-                        <TableCell>{n.status==true? "active":"non-active"}</TableCell>
+                        <TableCell>{this.statusInTable(n.status)}</TableCell>
                       </TableRow>
                     );
                   })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
