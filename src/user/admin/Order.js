@@ -633,10 +633,11 @@ class Order extends Component {
             </DialogContent>
             <DialogActions style={{minWidth: '30vw'}}>
               <div>
-                <Button onClick={()=>this.handlePrintButton(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
+                {
+                  this.state.dialogData.is_cancel != true ? (<Button onClick={()=>this.handlePrintButton(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
                   Print
-                  <PrintIcon className={classes.rightIcon}/>
-                </Button>
+                  <PrintIcon className={classes.rightIcon}/></Button>) : (null)
+                }
                 {
                   this.state.dialogData.is_approved==null? 
                   (<div><Button onClick={()=>this.handleReject(this.state.dialogData.id)} color="secondary" variant="contained" className={classes.button}>Reject<BlockIcon className={classes.rightIcon}/></Button>
