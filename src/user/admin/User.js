@@ -187,7 +187,7 @@ const cookie = new Cookies();
 class User extends Component {
   state = {
     order: 'asc',
-    orderBy: 'num',
+    orderBy: 'id',
     page: 0,
     rowsPerPage: 5,
     open: false,

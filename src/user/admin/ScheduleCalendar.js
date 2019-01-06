@@ -14,6 +14,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import List from '@material-ui/core/List';
+import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -26,7 +27,7 @@ class App extends Component {
     events: [],
     data : [],
     openDialog : false,
-    tempData : {},
+    tempData : {crew:[]},
     emptyData : false,
     vehicleData : [],
     anchorEl: null,
@@ -49,12 +50,18 @@ class App extends Component {
       let vehicleData = this.state.vehicleData[vehicleId];
       console.log('MY ID : ' + vehicleId);
       arr.push({
-        start : new Date(data[x].start),
-        end : new Date(data[x].end),
+        start : data[x].start,
+        end : data[x].end,
         title : data[x].code,
         id : data[x].id,
-        reservation : data[x].client_name + ' from ' + data[x].pick_up_location + ' to ' + data[x].destination,
-        vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number  
+        reservation : data[x].client_name ,
+        pick_up : data[x].pick_up_location,
+        destination : data[x].destination,
+        vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number,
+        crew : data[x].crew,
+        client_phone : data[x].client_phone,
+        price : data[x].price,
+        notes : data[x].notes  
       })
     }
     this.setState({events : arr, allEvents : arr});
@@ -86,13 +93,16 @@ class App extends Component {
   fetchData=()=>{
     this.setState({
 			loading : true
-		})
+    })
+    let payload = {};
+    payload.is_approved = true;
 		fetch('http://www.api.jakartabusrent.com/index.php/reservation/read',{
             method : 'POST',
             headers: {
                 'content-type': 'application/json',
                 'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
             },
+            body : JSON.stringify(payload)
         }).then(response => response.json())
         .then(responseJSON =>{
           const status = responseJSON.msg.toLowerCase();
@@ -153,7 +163,7 @@ class App extends Component {
 
   render() {
     const options = [
-      'Show all schedule', ...this.state.vehicleList
+      'All Vehicle', ...this.state.vehicleList
     ];
     const { anchorEl } = this.state;
     return (
@@ -208,13 +218,43 @@ class App extends Component {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle id="alert-dialog-title">{this.state.tempData.title}</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description">
-              Reservation by {(this.state.tempData.reservation)}<br />
-              Start : {(this.state.tempData.start + '').split ('GMT')[0]} <br />
-              End : {(this.state.tempData.end + '').split('GMT')[0]} <br />
-              Vehicle : {this.state.tempData.vehicle}
-            </DialogContentText>
+          <DialogContent style={{minWidth: '30vw'}}>
+            <List id="alert-dialog-description">
+              <ListItem>
+                <ListItemText style={{textTransform: 'capitalize'}} primary="Client Name" secondary={this.state.tempData.reservation} />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="Client Phone Number" secondary={this.state.tempData.client_phone} />
+              </ListItem>
+              <ListItem>
+                <ListItemText style={{textTransform: 'capitalize'}} primary="Destination" secondary={this.state.tempData.destination} />
+              </ListItem>
+              <ListItem>
+                <ListItemText style={{textTransform: 'capitalize'}} primary="Pickup Location" secondary={this.state.tempData.pick_up} />
+              </ListItem>
+              <ListItem>
+                <ListItemText style={{textTransform: 'capitalize'}} primary="Notes" secondary={this.state.tempData.notes} />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="Vehicle" secondary={this.state.tempData.vehicle} />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="Start Date" secondary={this.state.tempData.start} />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="End Date" secondary={this.state.tempData.end} />
+              </ListItem>
+              <ListItem>
+                <ListItemText primary="Price" secondary={'IDR '+this.state.tempData.price} />
+              </ListItem>
+              {
+                this.state.tempData.crew.map((item)=>(
+                  <ListItem>
+                    <ListItemText primary={item.crew_status} secondary={item.crew_name}/>
+                  </ListItem>
+                ))
+              }
+            </List>
           </DialogContent>
           <DialogActions>
             <Button onClick={()=>this._openNewTab()} color="primary">
