@@ -69,6 +69,7 @@ const rows = [
     { id: 'id', numeric: false, disablePadding: false, label: 'ID' },
     { id: 'code', numeric: false, disablePadding: false, label: 'Code Number' },
     { id: 'client_name', numeric: false, disablePadding: false, label: 'Client Name' },
+    { id: 'created', numeric: false, disablePadding: false, label: 'Order Created Date' },
     { id: 'start', numeric: false, disablePadding: false, label: 'Start Date' },
     { id: 'end', numeric: false, disablePadding: false, label: 'End Date' },
     { id: 'is_approved', numeric: false, disablePadding: false, label: 'Approved' },
@@ -219,7 +220,7 @@ const cookie = new Cookies();
 
 class Order extends Component {
   state = {
-    order: 'asc',
+    order: 'desc',
     orderBy: 'id',
     page: 0,
     rowsPerPage: 5,
@@ -267,7 +268,7 @@ class Order extends Component {
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
-        dialogData : responseJSON.data[0],
+        dialogData: responseJSON.data[0],
         open: true, 
         scroll
 			});
@@ -547,8 +548,9 @@ class Order extends Component {
                         <TableCell>{n.id}</TableCell>
                         <TableCell>{n.code}</TableCell>
                         <TableCell>{n.client_name}</TableCell>
-                        <TableCell>{n.start}</TableCell>
-                        <TableCell>{n.end}</TableCell>
+                        <TableCell>{moment(n.created).format('LL')}</TableCell>
+                        <TableCell>{moment(n.start).format('lll')}</TableCell>
+                        <TableCell>{moment(n.end).format('lll')}</TableCell>
                         <TableCell>{this.statusInTable(n.is_approved,n.is_cancel)}</TableCell>
                       </TableRow>
                     );
@@ -592,6 +594,9 @@ class Order extends Component {
                     <ListItemText primary="Code Number" secondary={this.state.dialogData.code} />
                   </ListItem>
                   <ListItem>
+                    <ListItemText primary="Order Created Date" secondary={moment(this.state.dialogData.created).format('LL')} />
+                  </ListItem>
+                  <ListItem>
                     <ListItemText style={{textTransform: 'capitalize'}} primary="Client Name" secondary={this.state.dialogData.client_name} />
                   </ListItem>
                   <ListItem>
@@ -613,13 +618,16 @@ class Order extends Component {
                     <ListItemText primary="Vehicle Number" secondary={this.state.dialogData.vehicle_number} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Start Date" secondary={this.state.dialogData.start} />
+                    <ListItemText primary="Start Date" secondary={moment(this.state.dialogData.start).format('LLL')} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="End Date" secondary={this.state.dialogData.end} />
+                    <ListItemText primary="End Date" secondary={moment(this.state.dialogData.end).format('LLL')} />
                   </ListItem>
                   <ListItem>
                     <ListItemText primary="Price" secondary={'IDR '+this.state.dialogData.price} />
+                  </ListItem>
+                  <ListItem style={{marginBottom:0, paddingBottom:0}}>
+                    <ListItemText primary="-Crew(s)-"/>
                   </ListItem>
                   {
                     this.state.dialogData.crew.map((n,id)=>(
