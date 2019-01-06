@@ -27,6 +27,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import IconButton from '@material-ui/core/IconButton';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Cookies from 'universal-cookie';
+import Snackbar from '@material-ui/core/Snackbar';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
@@ -408,6 +409,9 @@ _updatePayload = (id) => {
   }
 
   fetchData=()=>{
+    this.setState({
+      loading: true,
+    });
     //get list all user
     fetch('http://www.api.jakartabusrent.com/index.php/User_type/read',{
 		  method : 'POST'
@@ -417,7 +421,8 @@ _updatePayload = (id) => {
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
 			this.setState({
-			  data : responseJSON.data
+        data : responseJSON.data,
+        loading: false,
 			});
 		  }
       else if (responseJSON.msg.toLowerCase() === 'empty') {
@@ -612,6 +617,19 @@ _updatePayload = (id) => {
             </Button>
           </div>
         </Paper>
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'center',
+          }}
+          open={this.state.loading}
+          autoHideDuration={6000}
+          onClose={this.handleClose}
+          ContentProps={{
+            'aria-describedby': 'message-id',
+          }}
+          message={<span id="message-id">Loading...</span>}
+        />
       </Grid>
     );
   }
