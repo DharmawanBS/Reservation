@@ -44,13 +44,11 @@ var date = moment(date).format();
 var util = require('util')
 
 function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
+  return b[orderBy].localeCompare(a[orderBy],'en',{numeric:'true' ,sensitivity: 'base'});
+}
+
+function asc(a, b, orderBy) {
+  return a[orderBy].localeCompare(b[orderBy],'en',{numeric:'true' ,sensitivity: 'base'});
 }
 
 function stableSort(array, cmp) {
@@ -64,7 +62,7 @@ function stableSort(array, cmp) {
 }
 
 function getSorting(order, orderBy) {
-  return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => -desc(a, b, orderBy);
+  return order === 'desc' ? (a, b) => desc(a, b, orderBy) : (a, b) => asc(a, b, orderBy);
 }
 
 const rows = [
@@ -91,7 +89,7 @@ class EnhancedTableHead extends React.Component {
             return (
               <TableCell
                 key={row.id}
-                numeric={row.numeric}
+                align='center'
                 padding={row.disablePadding ? 'none' : 'default'}
                 sortDirection={orderBy === row.id ? order : false}
               >
@@ -222,7 +220,7 @@ const cookie = new Cookies();
 class Order extends Component {
   state = {
     order: 'asc',
-    orderBy: 'num',
+    orderBy: 'id',
     page: 0,
     rowsPerPage: 5,
     open: false,
@@ -307,7 +305,7 @@ class Order extends Component {
       }
 		}).then(response => response.json())
 		.then(responseJSON => {
-		  console.log(JSON.stringify(responseJSON.data))
+		  //console.log(JSON.stringify(responseJSON.data))
 		  let arr = [];
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
         this.setState({
@@ -519,10 +517,6 @@ class Order extends Component {
     win.focus();
   }
 
-  componentDidMount(){
-		this.fetchData();
-	}
-
   render() {
     const { classes } = this.props;
     const { data, order, orderBy, rowsPerPage, page } = this.state;
@@ -542,7 +536,7 @@ class Order extends Component {
               <TableBody>
                 {data.length > 0 ?(stableSort(data, getSorting(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((n,id) => {
+                  .map(n => {
                     return (
                       <TableRow
                         hover
@@ -550,9 +544,7 @@ class Order extends Component {
                         padding= 'default'
                         onClick={this.handleClickOpen('paper',n.id)}
                       >
-                        <TableCell component="th" scope="row" padding="default">
-                          {n.id}
-                        </TableCell>
+                        <TableCell>{n.id}</TableCell>
                         <TableCell>{n.code}</TableCell>
                         <TableCell>{n.client_name}</TableCell>
                         <TableCell>{n.start}</TableCell>
