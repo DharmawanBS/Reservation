@@ -88,7 +88,7 @@ const types = [
 	},
 ];
 
-const steps = ['Customer Data', 'Reservation Data', 'Bus & Pricing', 'Crew Data', 'Overview'];
+const steps = ['Customer Data', 'Reservation Data', 'Bus & Pricing', 'Payment Data', 'Overview'];
 
 const cookie = new Cookies();
 // Imagine you have a list of languages that you'd like to autosuggest.
@@ -134,10 +134,7 @@ class Reservation extends Component {
 			  this.setState({
 					raw_price : result[0].price,
 					selectedVehicle : result[0]
-			  },()=>{
-				this._calculatePrice();
 			  })
-			  
 		}
 	};
 
@@ -185,7 +182,11 @@ class Reservation extends Component {
 		createNewUser : false,
 		activeStep : 0,
 		crew : [],
-		selectedVehicle : {feature:[]}
+		selectedVehicle : {feature:[]},
+		dpMethod : '',
+		fullMethod : '',
+		dpValue : '',
+		fpValue : ''
 	};
 
 	handleSave = () =>{
@@ -210,7 +211,6 @@ class Reservation extends Component {
 			case this.state.start_date === '':
 			case this.state.end_date === '':
 			case this.state.busType === '':
-			case this.state.notes === '':
 			return true;
 			default : return false;
 		}
@@ -344,7 +344,10 @@ class Reservation extends Component {
 	}
 
 	_buildPayload=()=>{
-		var obj ={
+		let type = '';
+		if(this.state.dpValue === this.state.value) type = 'pelunasan'
+		else type = 'dp'
+		let obj ={
 			user : cookie.get('user_id'),
 			client_name : this.state.value,
 			client_phone : this.state.clientPhone,
@@ -355,7 +358,10 @@ class Reservation extends Component {
 			vehicle : this.state.busType,
 			notes : this.state.notes,
 			price : this.state.price,
-			crew : this.state.crew
+			payment_type : type,
+			payment_method : this.state.dpMethod,
+			payment_price : this.state.dpValue,
+			payment_date : this.dateFormatter((date + '').split('+')[0].slice(0,-3))
 		}
 		console.log(JSON.stringify(obj));
 		return JSON.stringify(obj);
@@ -392,6 +398,8 @@ class Reservation extends Component {
 					return !(Boolean(this.state.destination) && Boolean(this.state.pickup));
 				case 2 :
 					return !(Boolean(this.state.busType));
+				case 3 :
+					return !(Boolean(this.state.dpMethod) && Boolean(this.state.dpValue)); 
 			}
 		}
 	
@@ -616,14 +624,6 @@ class Reservation extends Component {
 										}
 								</List>
 								</Grid>
-								<Grid item style={{flex:1, marginLeft:8}}>
-								<List>
-									<ListSubheader>Price per Day : </ListSubheader>
-										<ListItem>
-											<ListItemText primary={'Rp. ' + this.state.selectedVehicle.price} />
-										</ListItem>
-								</List>
-								</Grid>
 						</Grid>
 						<TextField
 							disabled={this.state.loading}
@@ -654,36 +654,89 @@ class Reservation extends Component {
 			);
 		}
 
+		dpChange=(e)=>{
+			this.setState({
+				dpMethod : e.target.value
+			})
+		}
+		fpChange=(e)=>{
+			this.setState({
+				fullMethod : e.target.value
+			})
+		}
+
+		convertToRupiah=(angka)=>
+		{
+			var rupiah = '';		
+			var angkarev = angka.toString().split('').reverse().join('');
+			for(var i = 0; i < angkarev.length; i++) if(i%3 == 0) rupiah += angkarev.substr(i,3)+'.';
+			return 'Rp. '+rupiah.split('',rupiah.length-1).reverse().join('');
+		}
+
 		renderFourthStep=()=>{
 			return(
 				<div>
-						{
-							this.state.crewList.map((item,id)=>(
-								<Grid container style={{flex:1}}>
-								<TextField
-									disabled={this.state.loading}
-									inputRef = {(input) => this['crewName'+id] = input}
-									label="Crew Name"
-									style={{flex:1}}
-									margin="normal"
-									variant="outlined"
-									fullWidth
-								/>
-								<TextField
-									disabled={this.state.loading}
-									inputRef = {(input) => this['crewPosition'+id] = input}
-									label="Crew Position"
-									style={{flex:1}}
-									margin="normal"
-									variant="outlined"
-									fullWidth
-								/>
-								</Grid>
-							))
-						}
-						<Button onClick={()=>this.spanNewCrew()}>
-							Add new Crew
-						</Button> 
+					<Grid container>
+					<TextField
+						disabled={this.state.loading}
+						select
+						label="Payment Method"
+						style={{...styles.textField,flex:1}}
+						value={this.state.dpMethod}
+						onChange={(e)=>this.dpChange(e)}
+						margin="normal"
+						variant="outlined"
+						fullWidth
+						>
+						<MenuItem key='tf' value='transfer'>
+							Transfer
+						</MenuItem>
+						<MenuItem key='cash' value='tunai'>
+							Cash
+						</MenuItem>
+					</TextField>
+					<TextField
+						disabled={this.state.loading}
+						label="Amount"
+						type = "number"
+						style={{...styles.textField,flex:1}}
+						value={this.state.dpValue}
+						onChange={(e)=>this.setState({dpValue : e.target.value, fpValue : (this.state.price - e.target.value)})}
+						margin="normal"
+						variant="outlined"
+						fullWidth
+					/>
+					</Grid>
+					{/* <Grid container>
+					<TextField
+						disabled={this.state.loading}
+						select
+						label="Full Payment Method"
+						style={{...styles.textField,flex:1}}
+						value={this.state.fullMethod}
+						onChange={(e)=>this.fpChange(e)}
+						margin="normal"
+						variant="outlined"
+						fullWidth
+						>
+						<MenuItem key='tf' value='tf'>
+							Transfer
+						</MenuItem>
+						<MenuItem key='cash' value='cash'>
+							Cash
+						</MenuItem>
+					</TextField>
+					<TextField
+						disabled={this.state.loading}
+						label="Amount"
+						type = "number"
+						style={{...styles.textField,flex:1}}
+						value={this.state.fpValue}
+						margin="normal"
+						variant="outlined"
+						fullWidth
+					/>
+					</Grid> */}
 				</div>
 			);			
 		}
@@ -693,11 +746,21 @@ class Reservation extends Component {
 			return this.state.data.findIndex((item)=>item.id === id);
 		}
 
+		dateToShow=(str)=>{
+			const monthName = ["January", "February", "March", "April", "May", "June",
+				"July", "August", "September", "October", "November", "December"
+			];
+			let [date,time] = str.split('T');
+			let [year, month, day] = date.split('-');
+
+			return day + ' ' + monthName[parseInt(month)-1] + ' ' + year + ' ' + time
+		}
+
 		renderFifthStep=()=>{
 			return (
 				<div>
 					<List>
-					<ListSubheader>Reservation Data</ListSubheader>
+						<ListSubheader>Reservation Data</ListSubheader>
 							<ListItem>
 								<ListItemText primary="Client Name" secondary={this.state.value} />
 							</ListItem>
@@ -720,22 +783,21 @@ class Reservation extends Component {
 								<ListItemText primary="Vehicle Number" secondary={this.state.data[this.findVehicleData()].number} />
 							</ListItem>
 							<ListItem>
-								<ListItemText primary="Start Date" secondary={this.state.start_date} />
+								<ListItemText primary="Start Date" secondary={this.dateToShow(this.state.start_date)} />
 							</ListItem>
 							<ListItem>
-								<ListItemText primary="End Date" secondary={this.state.end_date} />
+								<ListItemText primary="End Date" secondary={this.dateToShow(this.state.end_date)} />
 							</ListItem>
 							<ListItem>
-								<ListItemText primary="Price" secondary={this.state.price} />
+								<ListItemText primary="Price" secondary={this.convertToRupiah(this.state.price)} />
 							</ListItem>
-							<ListSubheader>Crew Data</ListSubheader>
-							{
-								this.state.crew.map((item,id)=>(
-									<ListItem>
-										<ListItemText primary={item.name} secondary={item.status} />
-									</ListItem>
-								))
-							}
+						<ListSubheader>Payment</ListSubheader>
+							<ListItem>
+								<ListItemText primary="Down Payment" secondary={this.convertToRupiah(this.state.dpValue)} />
+							</ListItem>
+							<ListItem>
+								<ListItemText primary="Full Payment" secondary={this.convertToRupiah(this.state.fpValue)} />
+							</ListItem>
 					</List>
 				</div>
 			);
@@ -758,13 +820,7 @@ class Reservation extends Component {
 		}
 
 		nextHandler=()=>{
-			if(this.state.activeStep === 3){
-				 if(this['crewName'+0].value === '' || this['crewPosition'+0].value === ''){
-					window.alert('Crew cannot be empty');
-				}else{
-					this.setState({crew : this.buildCrewList(), activeStep : this.state.activeStep+1})
-				}
-			}else this.setState({activeStep : this.state.activeStep+1});
+			this.setState({activeStep : this.state.activeStep+1});
 		}
 
 		snackbars=()=>{

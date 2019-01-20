@@ -7,7 +7,7 @@ const dataBar = {
 	labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
 	datasets: [
 	  {
-		label: 'My First dataset',
+		label: 'Reservation Count',
 		backgroundColor: 'rgba(255,99,132,0.2)',
 		borderColor: 'rgba(255,99,132,1)',
 		borderWidth: 1,
@@ -49,6 +49,7 @@ const styles = {
 	}
 }
 export default class Dashboard extends Component {
+
     render() {
 		return(
 			<Grid container style={{padding:8}} justify='space-around'>

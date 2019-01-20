@@ -50,8 +50,8 @@ class App extends Component {
       let vehicleData = this.state.vehicleData[vehicleId];
       console.log('MY ID : ' + vehicleId);
       arr.push({
-        start : data[x].start,
-        end : data[x].end,
+        start : new Date(data[x].start),
+        end : new Date(data[x].end),
         title : data[x].code,
         id : data[x].id,
         reservation : data[x].client_name ,
@@ -88,6 +88,7 @@ class App extends Component {
         })
       }
     })
+    .catch((e)=>console.log(e))
   }
 
   fetchData=()=>{
@@ -134,11 +135,27 @@ class App extends Component {
     console.log(event);
   }
 
+  convertToRupiah=(angka)=>
+		{
+			var rupiah = '';		
+			var angkarev = angka.toString().split('').reverse().join('');
+			for(var i = 0; i < angkarev.length; i++) if(i%3 == 0) rupiah += angkarev.substr(i,3)+'.';
+			return 'Rp. '+rupiah.split('',rupiah.length-1).reverse().join('');
+		}
+
   _showString=(str)=>{
-    var date = new Date(str),
-        mnth = ("0" + (date.getMonth()+1)).slice(-2),
-        day  = ("0" + date.getDate()).slice(-2);
-    return [ date.getFullYear(), mnth, day ].join("-");
+    let monthNames = [
+      "January", "February", "March",
+      "April", "May", "June", "July",
+      "August", "September", "October",
+      "November", "December"
+    ];
+    let date = new Date(str),
+        mnth = monthNames[parseInt(("" + (date.getMonth())).slice(-2))],
+        day  = ("" + date.getDate()).slice(-2),
+        [hour, minute] = [('0'+date.getHours()).slice(-2), ('0'+date.getMinutes()).slice(-2)],
+        time = [hour, minute].join(':');
+    return [ day, mnth, date.getFullYear(), time].join(" ");
   }
 
   _openNewTab=()=>{
@@ -239,21 +256,14 @@ class App extends Component {
                 <ListItemText primary="Vehicle" secondary={this.state.tempData.vehicle} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Start Date" secondary={this.state.tempData.start} />
+                <ListItemText primary="Start Date" secondary={this._showString(this.state.tempData.start)} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="End Date" secondary={this.state.tempData.end} />
+                <ListItemText primary="End Date" secondary={this._showString(this.state.tempData.end)} />
               </ListItem>
               <ListItem>
-                <ListItemText primary="Price" secondary={'IDR '+this.state.tempData.price} />
+                <ListItemText primary="Price" secondary={this.convertToRupiah(this.state.tempData.price+'')} />
               </ListItem>
-              {
-                this.state.tempData.crew.map((item)=>(
-                  <ListItem>
-                    <ListItemText primary={item.crew_status} secondary={item.crew_name}/>
-                  </ListItem>
-                ))
-              }
             </List>
           </DialogContent>
           <DialogActions>
