@@ -211,7 +211,7 @@ export default class NewVehicle extends Component {
                     }}
                 />
                 <Grid container direction='row'>
-                    <Grid item  style={{flex:1}}>
+                    {/* <Grid item  style={{flex:1}}>
                     {this.spawnTitle('Photos')}
                     <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500, marginTop:16}}>
                         <input type='file' ref={this.imagePickerRef} accept='image/*' style={{display:'none'}} onChange={(e)=>this._handleFilePicker(e)}/>
@@ -223,8 +223,8 @@ export default class NewVehicle extends Component {
                             </Tooltip>
                         </GridListTile>
                     </GridList>
-                    </Grid>
-                    <Grid item style={{flex:1, marginLeft:24}}>
+                    </Grid> */}
+                    <Grid item style={{flex:1, marginTop : 16}}>
                     {this.spawnTitle('Features')}
                     <Grid style={{textAlign:'center'}}>
                         {

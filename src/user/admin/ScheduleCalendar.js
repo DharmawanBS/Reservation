@@ -27,7 +27,7 @@ class App extends Component {
     events: [],
     data : [],
     openDialog : false,
-    tempData : {crew:[]},
+    tempData : {payment:[]},
     emptyData : false,
     vehicleData : [],
     anchorEl: null,
@@ -58,7 +58,7 @@ class App extends Component {
         pick_up : data[x].pick_up_location,
         destination : data[x].destination,
         vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number,
-        crew : data[x].crew,
+        payment : data[x].payment,
         client_phone : data[x].client_phone,
         price : data[x].price,
         notes : data[x].notes  
@@ -227,6 +227,7 @@ class App extends Component {
           />
         </Paper>
         <Dialog
+          maxWidth = 'md'
           open={this.state.openDialog}
           onClose={()=>this.setState({
             openDialog : false
@@ -235,36 +236,53 @@ class App extends Component {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle id="alert-dialog-title">{this.state.tempData.title}</DialogTitle>
-          <DialogContent style={{minWidth: '30vw'}}>
-            <List id="alert-dialog-description">
-              <ListItem>
-                <ListItemText style={{textTransform: 'capitalize'}} primary="Client Name" secondary={this.state.tempData.reservation} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Client Phone Number" secondary={this.state.tempData.client_phone} />
-              </ListItem>
-              <ListItem>
-                <ListItemText style={{textTransform: 'capitalize'}} primary="Destination" secondary={this.state.tempData.destination} />
-              </ListItem>
-              <ListItem>
-                <ListItemText style={{textTransform: 'capitalize'}} primary="Pickup Location" secondary={this.state.tempData.pick_up} />
-              </ListItem>
-              <ListItem>
-                <ListItemText style={{textTransform: 'capitalize'}} primary="Notes" secondary={this.state.tempData.notes} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Vehicle" secondary={this.state.tempData.vehicle} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Start Date" secondary={this._showString(this.state.tempData.start)} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="End Date" secondary={this._showString(this.state.tempData.end)} />
-              </ListItem>
-              <ListItem>
-                <ListItemText primary="Price" secondary={this.convertToRupiah(this.state.tempData.price+'')} />
-              </ListItem>
-            </List>
+          <DialogContent>
+            <Grid container>
+              <Grid item>
+              <List id="alert-dialog-description">
+               <ListSubheader>Reservation Data</ListSubheader>
+                <ListItem>
+                  <ListItemText style={{textTransform: 'capitalize'}} primary="Client Name" secondary={this.state.tempData.reservation} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Client Phone Number" secondary={this.state.tempData.client_phone} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText style={{textTransform: 'capitalize'}} primary="Destination" secondary={this.state.tempData.destination} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText style={{textTransform: 'capitalize'}} primary="Pickup Location" secondary={this.state.tempData.pick_up} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText style={{textTransform: 'capitalize'}} primary="Notes" secondary={this.state.tempData.notes} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Vehicle" secondary={this.state.tempData.vehicle} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="Start Date" secondary={this._showString(this.state.tempData.start)} />
+                </ListItem>
+                <ListItem>
+                  <ListItemText primary="End Date" secondary={this._showString(this.state.tempData.end)} />
+                </ListItem>
+              </List>
+              </Grid>
+              <Grid item>
+              <List id="alert-dialog-description">
+               <ListSubheader>Payment Data</ListSubheader>
+               <ListItem>
+                  <ListItemText primary="Full Price" secondary={this.convertToRupiah(this.state.tempData.price+'')} />
+                </ListItem>
+                {
+                  this.state.tempData.payment.map((item)=>(
+                    <ListItem>
+                      <ListItemText style={{textTransform: 'capitalize'}} primary={item.payment_type.toUpperCase() + ' (' + item.payment_method.toUpperCase() + ')'} secondary={this.convertToRupiah(item.payment_price)} />
+                    </ListItem>
+                  ))
+                }
+              </List>
+              </Grid>
+            </Grid>
           </DialogContent>
           <DialogActions>
             <Button onClick={()=>this._openNewTab()} color="primary">

@@ -137,15 +137,11 @@ class VehicleEdit extends Component {
     let user = cookies.get('user_id');
     let type = this['vehicleType'].value;
     let number = this['plateNumber'].value;
-    let price = this['defaultPrice'].value;
     let id = this.state.vehicleData.id;
-    let prices = this.buildPrices();
     payload.id = id;
     payload.user = user;
     payload.type = type;
     payload.number = number;
-    payload.prices = prices;
-    payload.price = price;
     payload.feature = feature;
     console.log(JSON.stringify(payload));
     return payload;
@@ -265,7 +261,7 @@ class VehicleEdit extends Component {
             }}
           />
           <Grid container direction='row'>
-            <Grid item  style={{flex:1}}>
+            {/* <Grid item  style={{flex:1}}>
               {this.spawnTitle('Photos')}
               <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500, marginTop:16}}>
                 {tileData.map(tile => (
@@ -290,8 +286,8 @@ class VehicleEdit extends Component {
                     </Tooltip>
                   </GridListTile>
               </GridList>
-            </Grid>
-            <Grid item style={{flex:1, marginLeft:24}}>
+            </Grid> */}
+            <Grid item style={{flex:1, marginTop:16}}>
              {this.spawnTitle('Features')}
               <Grid style={{textAlign:'center'}}>
                 {
@@ -330,7 +326,7 @@ class VehicleEdit extends Component {
           </Grid>
           <Grid container style={{marginTop:16}}>
             <Grid item style={{flex:1}}>
-              {this.spawnTitle('Prices')}
+              {/* {this.spawnTitle('Prices')}
               <TextField
                 value='Default Price'
                 label='Account Type'
@@ -388,7 +384,7 @@ class VehicleEdit extends Component {
                       </Grid>
                     ))
                   }
-              </Grid>
+              </Grid> */}
             </Grid>
             <Grid container style={{flex:1}} justify='flex-end' alignContent='flex-end' alignItems='flex-end' spacing={16}>
               <Grid item>

@@ -401,7 +401,7 @@ class Vehicle extends Component {
                       <ExpansionPanelDetails>
                       <Grid style={{paddingTop:16}}>
                           <Grid container>
-                            <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500}}>
+                            {/* <GridList style={{transform:'translateZ(0)', flex:1, justifyContent:'center', overflow:'auto', maxHeight:500}}>
                                 {tileData.map(tile => (
                                 <GridListTile key={tile.img} style={{height:100, width:200}}>
                                     <img src={tile.img} alt={tile.title}/>
@@ -410,9 +410,9 @@ class Vehicle extends Component {
                                     />
                                 </GridListTile>
                                 ))}
-                            </GridList>
-                            <Grid style={{flex:0.5}}>
-                            <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginBottom:8}}>
+                            </GridList> */}
+                            <Grid>
+                            <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginBottom:8}}>
                                 Features
                             </Typography>
                             <Grid style={{overflow:'auto', maxHeight:500, overflowX:'hidden'}}>
@@ -426,12 +426,6 @@ class Vehicle extends Component {
                                 ))
                             }
                             </Grid>
-                            <Typography variant="h5" id="simple-modal-description" style={{textAlign:'left', flex:0.5, marginLeft:24, marginTop:16}}>
-                                Price
-                            </Typography>
-                            <Typography variant="subtitle1" style={{textAlign:'left', flex:0.5, marginLeft:8,padding:8}}>
-                                Rp. {item.price} / day
-                            </Typography>
                             </Grid>
                           </Grid>
                           <Grid style={{textAlign:'right', marginTop:8}}>
