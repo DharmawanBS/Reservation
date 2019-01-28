@@ -103,19 +103,27 @@ export default class NewVehicle extends Component {
         let user = cookie.get('user_id');
         let type = this['vehicleType'].value;
         let number = this['plateNumber'].value;
-        let price = this['defaultPrice'].value;
-        let prices = this.buildPrices();
         payload.user = user;
         payload.type = type;
         payload.number = number;
-        payload.prices = prices;
-        payload.price = price;
         payload.feature = feature;
         console.log(JSON.stringify(payload));
         return payload;
       }
-    
+  
+      isEmpty(){
+        if(
+          Boolean(this['vehicleType'].value) ||
+          Boolean(this['plateNumber'].value) ||
+          Boolean(this.buildFeature())
+          ) return true;
+      }
+
       submitPayload(){
+        if(this.isEmpty()){
+          window.alert('Form cannot be empty');
+          return;
+        }
         this.setState({
           loading : true
         })
@@ -262,65 +270,6 @@ export default class NewVehicle extends Component {
             </Grid>
           </Grid>
           <Grid container style={{marginTop:16}}>
-            <Grid item style={{flex:1}}>
-              {this.spawnTitle('Prices')}
-              <TextField
-                value='Default Price'
-                label='Account Type'
-                margin="normal"
-                variant="outlined"
-                style={{flex:1}}
-                disabled={this.state.loading}
-              />
-              <TextField
-                inputRef={(input)=>{this['defaultPrice'] = input}}
-                margin="normal"
-                label='Price'
-                variant="outlined"
-                type='number'
-                style={{flex:1}}
-                disabled={this.state.loading}
-              />
-              <Grid style={{textAlign:'center'}}>
-                  {
-                    userTypes.map((item, id)=>(
-                      <Grid container>
-                      <TextField
-                        inputRef={(input)=>{this['userType'+id] = input}}
-                        value={item.name}
-                        label='Account Type'
-                        margin="normal"
-                        variant="outlined"
-                        style={{flex:1}}
-                        disabled={this.state.loading}
-                      />
-                      <TextField
-                        inputRef={(input)=>{this['newPrice'+id] = input}}
-                        margin="normal"
-                        label='Price'
-                        variant="outlined"
-                        type='number'
-                        style={{flex:0.5}}
-                        disabled={this.state.loading}
-                      />
-                      <TextField
-                        inputRef={(input)=>{this['startDate'+id] = input}}
-                        margin="normal"
-                        label='Starting Date'
-                        defaultValue = {date}
-                        variant="outlined"
-                        type='date'
-                        style={{flex:1}}
-                        disabled={this.state.loading}
-                        InputLabelProps={{
-                          shrink : true
-                        }}
-                      />
-                      </Grid>
-                    ))
-                  }
-              </Grid>
-            </Grid>
             <Grid container style={{flex:1}} justify='flex-end' alignContent='flex-end' alignItems='flex-end' spacing={16}>
               <Grid item>
               <Button disabled={this.state.loading} variant='outlined' color='primary' onClick={()=>this.submitPayload()}>

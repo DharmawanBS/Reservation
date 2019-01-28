@@ -229,14 +229,17 @@ class Reservation extends Component {
             body : this._buildPayload()
         }).then(response => response.json())
         .then(responseJSON =>{
+			this.setState({loading : false});
             if(responseJSON.msg.toLowerCase() === 'ok'){
                 this.setState({
 					submit_success : true,
-					loading : false
 				},()=>{setTimeout(()=>{
 					window.location.reload();
 				}, 1000)});
-            }
+            }else if(responseJSON.msg.toLowerCase() === 'failed' || responseJSON.msg.toLowerCase() === 'invalid'){
+				window.alert('Something went wrong, please try again');
+				window.location.reload();
+			}
 		})
 		.catch(e=>console.log(e));
 	}
@@ -261,8 +264,13 @@ class Reservation extends Component {
 		payload.date_start = start;
 		payload.date_end = end;
 		payload.is_free = true;
+		console.log("Vehicle : " + JSON.stringify(payload))
 		fetch('http://www.api.jakartabusrent.com/index.php/Vehicle/read',{
 			method : 'POST',
+			headers: {
+                'content-type': 'application/json',
+                'Accept': 'application/json, application/xml, text/plain, text/html, *.*',
+            },
 			body : JSON.stringify(payload)
 		}).then(response => response.json())
 		.then(responseJSON => {
@@ -642,7 +650,7 @@ class Reservation extends Component {
 							onChange={(e)=>this.setState({price : e.target.value})}
 							style={[styles.dense, styles.textField]}
 							variant="outlined"
-							label="Price"
+							label="Price per Day"
 							value={this.state.price}
 							InputProps={{
 								startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
@@ -650,6 +658,9 @@ class Reservation extends Component {
 							fullWidth
 							type='Number'
 						/>
+						<Typography style={{marginTop:8}}>
+							Total Price : {this.convertToRupiah(this.state.price * parseInt(this.getDateDiff()))}
+						</Typography>
 				</div>
 			);
 		}
@@ -701,12 +712,19 @@ class Reservation extends Component {
 						type = "number"
 						style={{...styles.textField,flex:1}}
 						value={this.state.dpValue}
-						onChange={(e)=>this.setState({dpValue : e.target.value, fpValue : (this.state.price - e.target.value)})}
+						onChange={(e)=>{
+							if(parseInt(e.target.value) <= parseInt(this.state.price * parseInt(this.getDateDiff()))){
+								this.setState({dpValue : e.target.value, fpValue : (this.state.price * parseInt(this.getDateDiff())-parseInt(e.target.value))})
+							}
+						}}
 						margin="normal"
 						variant="outlined"
 						fullWidth
 					/>
 					</Grid>
+					<Typography style={{marginTop:8}}>
+						Remaining : {this.convertToRupiah((this.state.price * parseInt(this.getDateDiff())-parseInt(this.state.dpValue)))}
+					</Typography>
 					{/* <Grid container>
 					<TextField
 						disabled={this.state.loading}
