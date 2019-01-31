@@ -4,7 +4,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import {Route} from 'react-router-dom';
 
-import Check from './Check';
+import Reservation from './Reservation';
 import Available from './Available';
 import BookingDetail from './BookingDetail';
 import { Grid } from "@material-ui/core";
@@ -105,8 +105,8 @@ class LandingPage extends Component {
             </Toolbar>
         </AppBar>
         </div>
-        <Grid container style={{flex:1, position:'absolute', top:0, left:0, right:0, bottom:0}}>
-            <Route exact path='/user' component={Check}></Route>
+        <Grid container style={{flex:1, position:'absolute', top:0, left:0, right:0, bottom:0}} justify='center' alignItems='center'>
+            <Route exact path='/user' component={Reservation}></Route>
             <Route exact path='/user/available' component={Available}></Route>
             <Route exact path='/user/booking detail' component={BookingDetail}></Route>
         </Grid>
