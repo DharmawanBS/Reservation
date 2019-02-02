@@ -12,9 +12,13 @@ import Snackbar from '@material-ui/core/Snackbar';
 import SnackbarContent from '@material-ui/core/SnackbarContent';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import moment from 'moment';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
 
 //icons
-import SaveIcon from '@material-ui/icons/Save';
+import DoneIcon from '@material-ui/icons/Done';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import green from '@material-ui/core/colors/green';
 import ArrowBack from '@material-ui/icons/ArrowBack';
@@ -80,7 +84,7 @@ const types = [
 const cookie = new Cookies();
 
 //class for update user data
-class UpdateOrder extends Component {
+class ApproveClientOrder extends Component {
 	handleChangeTextbox = name => event => {
 		this.setState({
 		  [name]: event.target.value,
@@ -119,14 +123,23 @@ class UpdateOrder extends Component {
 		notes: '',
 		name : '',
 		start_date : (date + '').split('+')[0].slice(0,-3),
-		end_date : (date + '').split('+')[0].slice(0,-3),
+        end_date : (date + '').split('+')[0].slice(0,-3),
+        payment_date: (date + '').split('+')[0].slice(0,-3),
+        methodValue:'transfer',
+        typeValue:'pelunasan',
 	};
 
     handleBackButton = () => {
         this.props.history.push({
-            pathname : '/admin/orders',
+            pathname : '/admin/orders/user',
           });
     };
+
+    handleDoneApprove = () => {
+        this.props.history.push({
+            pathname : '/admin/orders',
+          });
+    }
 
     _emptyChecker=()=>{
 		var empty = false;
@@ -139,6 +152,10 @@ class UpdateOrder extends Component {
 			case this['client_finish_date'].value === '':
 			case this.state.busTypes === '':
 			case this['client_notes'].value === '':
+			case this['price'].value === '':
+			case this['payment_price'].value === '':
+			case this.state.methodValue === '':
+			case this.state.typeValue === '':
 			return true;
 			default : return false;
 		}
@@ -174,7 +191,7 @@ class UpdateOrder extends Component {
 					loading : false
                 });
                 setTimeout(
-                    this.handleBackButton(),
+                    this.handleDoneApprove(),
                     1000
                 )
             }
@@ -195,7 +212,11 @@ class UpdateOrder extends Component {
 			end : this.dateFormatter(this.state.end_date),
 			vehicle : this.state.busTypes,
 			notes : this['client_notes'].value,
-			price : this['price'].value,
+            price : this['price'].value,
+            payment_method: this.state.methodValue,
+            payment_type: this.state.typeValue,
+            payment_price: this['payment_price'].value,
+            payment_date: this.dateFormatter(this.state.payment_date),
 		}
 		console.log(JSON.stringify(obj));
 		return JSON.stringify(obj);
@@ -416,7 +437,6 @@ class UpdateOrder extends Component {
                             />
                             <TextField
                                 disabled={this.state.loading}
-                                defaultValue={this.state.data.price}
                                 inputRef = {(input) => this['price'] = input}
                                 label="Price per Day"
                                 InputProps={{
@@ -427,14 +447,65 @@ class UpdateOrder extends Component {
                                 variant="outlined"
                                 fullWidth
                             />
+                            <FormLabel component="legend">Payment Method</FormLabel>
+                            <RadioGroup
+                                aria-label="Payment Method"
+                                name="payment_method"
+                                value={this.state.methodValue}
+                                onChange={this.handleChange('methodValue')}
+                                style={{flex:1}}
+                            >
+                                <FormControlLabel value="tunai" control={<Radio />} label="Tunai" />
+                                <FormControlLabel value="transfer" control={<Radio />} label="Transfer" />
+                            </RadioGroup>
+                            <FormLabel component="legend">Payment Type</FormLabel>
+                            <RadioGroup
+                                aria-label="Payment Type"
+                                name="payment_type"
+                                value={this.state.typeValue}
+                                onChange={this.handleChange('typeValue')}
+                                style={{flex:1}}
+                            >
+                                <FormControlLabel value="dp" control={<Radio />} label="DP" />
+                                <FormControlLabel value="pelunasan" control={<Radio />} label="Pelunasan" />
+                            </RadioGroup>
+                            <TextField
+                                disabled={this.state.loading}
+                                inputRef = {(input) => this['payment_price'] = input}
+                                label="Payment Price"
+                                InputProps={{
+                                    startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
+                                }}
+                                style={{flex:1}}
+                                margin="normal"
+                                variant="outlined"
+                                fullWidth
+                            />
+                            <TextField
+                                disabled={this.state.loading}
+                                label="Payment Date"
+                                inputRef = {(input) => this['payment_date'] = input}
+                                value={this.state.payment_date}
+                                onChange={(e)=>{
+                                    this.setState({payment_date : e.target.value})
+                                    }   
+                                }
+                                type="datetime-local"
+                                className={classes.textField}
+                                InputLabelProps={{
+                                shrink: true,
+                                }}
+                                fullWidth
+                            />
+
                             <div style={{textAlign: 'right'}}>
                                 <Button disabled={this.state.loading} variant="contained" color="secondary" className={classes.button} onClick={()=>this.handleBackButton()}>
                                     <ArrowBack className={classes.leftIcon} />
                                     Back Without Saving
                                 </Button>
                                 <Button disabled={this.state.loading} variant="contained" color="primary" className={classes.button} onClick={()=>this._handleSubmitButton()}>
-                                    <SaveIcon className={classes.leftIcon} />
-                                    Save
+                                    <DoneIcon className={classes.leftIcon} />
+                                    Approve
                                 </Button>
                             </div>
                         </form>
@@ -468,4 +539,4 @@ class UpdateOrder extends Component {
 	}
 }
 
-export default withStyles(styles)(UpdateOrder);
+export default withStyles(styles)(ApproveClientOrder);

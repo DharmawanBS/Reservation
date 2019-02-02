@@ -25,28 +25,14 @@ import Grid from '@material-ui/core/Grid';
 import moment from 'moment';
 import Snackbar from '@material-ui/core/Snackbar';
 import Cookies from 'universal-cookie';
-import TextField from '@material-ui/core/TextField';
 import Chip from '@material-ui/core/Chip';
-import MenuItem from '@material-ui/core/MenuItem';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
 
 //styles
 import { withStyles } from '@material-ui/core/styles';
 
 //icons
-import ClearIcon from '@material-ui/icons/Clear';
-import AddIcon from '@material-ui/icons/Add';
-import PrintIcon from '@material-ui/icons/Print';
 import BlockIcon from '@material-ui/icons/Block';
 import DoneIcon from '@material-ui/icons/Done';
-import SaveIcon from '@material-ui/icons/Save';
-import PaymentIcon from '@material-ui/icons/Payment';
-import CreateIcon from '@material-ui/icons/Create';
-import { isNull } from 'util';
 
 //var
 var date = moment(date).format();
@@ -75,13 +61,10 @@ function getSorting(order, orderBy) {
 }
 
 const rows = [
-    { id: 'code', numeric: false, disablePadding: false, label: 'Code Number' },
     { id: 'client_name', numeric: false, disablePadding: false, label: 'Client Name' },
     { id: 'created', numeric: false, disablePadding: false, label: 'Order Created Date' },
     { id: 'start', numeric: false, disablePadding: false, label: 'Start Date' },
     { id: 'end', numeric: false, disablePadding: false, label: 'End Date' },
-    { id: 'is_approved', numeric: false, disablePadding: false, label: 'Status' },
-    { id: 'payment_type', numeric: false, disablePadding: false, label: 'Payment History' },
 ];
 
 class EnhancedTableHead extends React.Component {
@@ -149,7 +132,7 @@ let EnhancedTableToolbar = props => {
     >
       <div className={classes.title}>
         <Typography variant="h6" id="tableTitle">
-            List Orders
+            List Orders from User
         </Typography>
       </div>
     </Toolbar>
@@ -227,7 +210,7 @@ const styles = theme => ({
 
 const cookie = new Cookies();
 
-class Order extends Component {
+class OrderClient extends Component {
   state = {
     order: 'desc',
     orderBy: 'created',
@@ -246,31 +229,6 @@ class Order extends Component {
     dialogData: {
       payment: []
     },
-    openPayment: false,
-    payment_date: (date + '').split('+')[0].slice(0,-3),
-    methodValue:'transfer',
-    typeValue:'pelunasan',
-    method : [
-      {
-        value: 'transfer',
-        label: 'Transfer',
-      },
-      {
-        value: 'tunai',
-        label: 'Tunai',
-      },
-    ],
-    paymentType : [
-      {
-        value: 'pelunasan',
-        label: 'Pelunasan',
-      },
-      {
-        value: 'dp',
-        label: 'DP',
-      },
-    ],
-    flagResponse : 0,
   };
 
   handleChange = name => event => {
@@ -332,25 +290,13 @@ class Order extends Component {
     this.setState({ openDelete: false, edit: false });
   };
 
-  handleOpenAdd = (text) => {
-    this.props.history.replace('/admin/' + text);
-  }
-
   handleEdit = (text) => {
-    this.props.history.replace('/admin/orders/edit/' + text);
-  }
-
-  handleOpenPayment = () => {
-    this.setState({ open: false, openPayment: true});
-  }
-
-  handleClosePayment = () => {
-    this.setState({ openPayment: false});
+    this.props.history.replace('/admin/orders/user/approve/' + text);
   }
 
   fetchData=()=>{
     var arr = []
-    this.setState({loading: true,});
+    this.setState({loading: true});
     //get list all reservasi
     fetch('http://www.api.jakartabusrent.com/index.php/reservation/read',{
       method : 'POST',
@@ -362,17 +308,17 @@ class Order extends Component {
 		.then(responseJSON => {
 		  //console.log(JSON.stringify(responseJSON.data))
 		  if(responseJSON.msg.toLowerCase() === 'ok'){
-        arr = responseJSON.data;
-        this.filterData(arr);
-        this.setState({
-          loading: false
-        });
-      }
-      else if (responseJSON.msg.toLowerCase() === 'empty') {
-        this.setState({
+            arr = responseJSON.data;
+            this.filterData(arr);
+            this.setState({
             loading: false
-        });
-      }
+            });
+        }
+        else if (responseJSON.msg.toLowerCase() === 'empty') {
+            this.setState({
+                loading: false
+            });
+        }
     });
   }
 
@@ -381,7 +327,7 @@ class Order extends Component {
     let j=0;
     if (data.length > 0){
       for (var i=0;i<data.length;i++){
-        if(data[i].is_approved != null) {
+        if(data[i].is_approved == null) {
           arr[j]=data[i];
           j+=1;
         }
@@ -415,7 +361,7 @@ class Order extends Component {
 	  
     var hasil =  Math.floor((utc2 - utc1) / _MS_PER_DAY);
     return hasil;
-	}
+  }
 
   _cancelPayload = (id) => {
     this.setState({
@@ -506,7 +452,6 @@ class Order extends Component {
       payment_type: this.state.typeValue,
       payment_price: this['payment_price'].value,
       payment_date: this.dateFormatter(this.state.payment_date),
-      price : this.state.dialogData.price,
     }
     console.log(JSON.stringify(obj));
     return JSON.stringify(obj);
@@ -523,7 +468,7 @@ class Order extends Component {
   componentDidMount(){
     this.fetchData();
   }
-
+  
   handlePrintButton = (id) => {
     var win = window.open('http://www.api.jakartabusrent.com/index.php/reservation/print?id='+id, '_blank');
     win.focus();
@@ -556,15 +501,10 @@ class Order extends Component {
                         padding= 'default'
                         onClick={this.handleClickOpen('paper',n.id)}
                       >
-                        <TableCell>{n.code}</TableCell>
                         <TableCell>{n.client_name}</TableCell>
                         <TableCell>{moment(n.created).format('LL')}</TableCell>
                         <TableCell>{moment(n.start).format('lll')}</TableCell>
                         <TableCell>{moment(n.end).format('lll')}</TableCell>
-                        <TableCell>{this.statusInTable(n.is_approved)}</TableCell>
-                        <TableCell>{
-                          n.paid != n.total ? (<Chip label="DP" className={[classes.chip,classes.cssNormal]}/>) : (<Chip label="Lunas" className={[classes.chip,classes.cssApproved]}/>)
-                        }</TableCell>
                       </TableRow>
                     );
                   })): (<TableRow><center><p style={{color: "#BDBDBD"}}>Data is Empty</p></center></TableRow>)}
@@ -596,13 +536,10 @@ class Order extends Component {
             scroll={this.state.scroll}
             aria-labelledby="scroll-dialog-title"
           >
-            <DialogTitle id="scroll-dialog-title">Reservation Data {this.state.dialogData.is_approved == false ? (<Chip size="small" variant="contained" style={{backgroundColor: '#b71c1c',color: 'white'}} label='Canceled'></Chip>): (this.state.dialogData.paid != this.state.dialogData.total ? (<Chip label="DP" className={[classes.chip,classes.cssNormal]}/>) : (<Chip label="Lunas" className={[classes.chip,classes.cssApproved]}/>))}</DialogTitle>
+            <DialogTitle id="scroll-dialog-title">Reservation Data from {this.state.dialogData.client_name}</DialogTitle>
             <DialogContent style={{minWidth: '30vw'}}>
               <DialogContentText>
                 <List>
-                  <ListItem>
-                    <ListItemText primary="Code Number" secondary={this.state.dialogData.code} />
-                  </ListItem>
                   <ListItem>
                     <ListItemText primary="Order Created Date" secondary={moment(this.state.dialogData.created).format('LL')} />
                   </ListItem>
@@ -634,15 +571,6 @@ class Order extends Component {
                     <ListItemText primary="End Date" secondary={moment(this.state.dialogData.end).format('LLL')} />
                   </ListItem>
                   <ListItem>
-                    <ListItemText primary="Duration" secondary={this.state.dialogData.duration + ' day(s)'} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Price per Day" secondary={'IDR '+this.state.dialogData.price} />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemText primary="Total Price" secondary={'IDR '+this.state.dialogData.total} />
-                  </ListItem>
-                  <ListItem>
                     <ListItemText primary="- Payment History -"/>
                   </ListItem>
                   {
@@ -661,29 +589,14 @@ class Order extends Component {
             </DialogContent>
             <DialogActions style={{minWidth: '30vw'}}>
               <div>
-                {
-                  this.state.dialogData.is_approved != false ? (<Button onClick={()=>this.handlePrintButton(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
-                  Print
-                  <PrintIcon className={classes.rightIcon}/></Button>) : (null)
-                }
-                {
-                  this.state.dialogData.paid != this.state.dialogData.total && this.state.dialogData.is_approved!=false ? 
-                  (<Button onClick={this.handleOpenPayment} color="primary" variant="contained" className={classes.button}>
-                  Update Payment
-                  <PaymentIcon className={classes.rightIcon} /></Button>) : (null)
-                }
-                {
-                  this.dateDiffInDays(new Date((date + '').split('+')[0].slice(0,-3).split('T')[0]),new Date(this.state.dialogData.start)) >= 1 &&  this.state.dialogData.is_approved!=false? 
-                  (<Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
-                  Edit Reservation<CreateIcon className={classes.rightIcon} />
-                  </Button>) : (null)
-                }
-                {
-                  this.state.dialogData.is_approved!=false && this.dateDiffInDays(new Date((date + '').split('+')[0].slice(0,-3).split('T')[0]),new Date(this.state.dialogData.start)) >= 1 ? 
-                  (<Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
-                  Cancel
-                  <ClearIcon className={classes.rightIcon} /></Button>) : (null)
-                }
+                <Button onClick={()=>this.handleEdit(this.state.dialogData.id)} color="primary" variant="contained" className={classes.button}>
+                    Approve
+                    <DoneIcon className={classes.rightIcon} />
+                </Button>
+                <Button onClick={this.handleClickOpenDelete} color="secondary" variant="contained" className={classes.button}>
+                    Reject
+                    <BlockIcon className={classes.rightIcon} />
+                </Button>
               </div>
             </DialogActions>
           </Dialog>
@@ -693,7 +606,7 @@ class Order extends Component {
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
           >
-            <DialogTitle id="alert-dialog-title">Are you sure you want to cancel record for {this.state.dialogData.client_name} ?</DialogTitle>
+            <DialogTitle id="alert-dialog-title">Are you sure you want to reject order from {this.state.dialogData.client_name} ?</DialogTitle>
             <DialogContent></DialogContent>
             <DialogActions>
               <Button onClick={this.handleCloseDelete} color="primary" className={classes.button}>
@@ -704,89 +617,6 @@ class Order extends Component {
               </Button>
             </DialogActions>
           </Dialog>
-          <Dialog
-            open={this.state.openPayment}
-            onClose={this.handleClosePayment}
-            scroll={this.state.scroll}
-            aria-labelledby="scroll-dialog-title"
-          >
-            <DialogTitle id="scroll-dialog-title">Update Payment {this.state.dialogData.code}</DialogTitle>
-            <DialogContent style={{minWidth: '30vw'}}>
-              <DialogContentText>
-                <form>
-                  <Grid>
-                    <FormLabel component="legend">Payment Method</FormLabel>
-                    <RadioGroup
-                      aria-label="Payment Method"
-                      name="payment_method"
-                      value={this.state.methodValue}
-                      onChange={this.handleChange('methodValue')}
-                      style={{flex:1}}
-                    >
-                      <FormControlLabel value="tunai" control={<Radio />} label="Tunai" />
-                      <FormControlLabel value="transfer" control={<Radio />} label="Transfer" />
-                    </RadioGroup>
-                    <FormLabel component="legend">Payment Type</FormLabel>
-                    <RadioGroup
-                      aria-label="Payment Type"
-                      name="payment_type"
-                      value={this.state.typeValue}
-                      onChange={this.handleChange('typeValue')}
-                      style={{flex:1}}
-                    >
-                      <FormControlLabel value="dp" control={<Radio />} label="DP" />
-                      <FormControlLabel value="pelunasan" control={<Radio />} label="Pelunasan" />
-                    </RadioGroup>
-                    <TextField
-                      disabled={this.state.loading}
-                      inputRef = {(input) => this['payment_price'] = input}
-                      label="Payment Price"
-                      InputProps={{
-                        startAdornment: <InputAdornment position="start">IDR</InputAdornment>,
-                      }}
-                      style={{flex:1}}
-                      margin="normal"
-                      variant="outlined"
-                      fullWidth
-                    />
-                    <TextField
-                      disabled={this.state.loading}
-                      label="Payment Date"
-                      inputRef = {(input) => this['payment_date'] = input}
-                      value={this.state.payment_date}
-                      onChange={(e)=>{
-                          this.setState({payment_date : e.target.value})
-                          }   
-                      }
-                      type="datetime-local"
-                      className={classes.textField}
-                      InputLabelProps={{
-                      shrink: true,
-                      }}
-                      fullWidth
-                    />
-                  </Grid>
-                </form>
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <div>
-                <Button variant="contained" color="primary" onClick={this.handleUpdatePayment} className={classes.button}>
-                  Save
-                  <SaveIcon style={styles.rightIcon} />
-                </Button>
-                <Button onClick={this.handleClosePayment} color="secondary" variant="contained" className={classes.button}>
-                  Cancel
-                  <ClearIcon style={styles.rightIcon} />
-                </Button>
-              </div>
-            </DialogActions>
-          </Dialog>
-          <div>
-            <Button variant="fab" color="primary" aria-label="Add" className={classes.addButtonBottom} onClick={()=>{this.handleOpenAdd('reservation')}}>
-              <AddIcon />
-            </Button>
-          </div>
         </Paper>
         <Snackbar
           anchorOrigin={{
@@ -806,8 +636,8 @@ class Order extends Component {
   }
 }
 
-Order.propTypes = {
+OrderClient.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Order);
+export default withStyles(styles)(OrderClient);
