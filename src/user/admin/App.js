@@ -38,6 +38,8 @@ import DirectionsBus from '@material-ui/icons/DirectionsBus';
 import Receipt from '@material-ui/icons/Receipt'
 import PowerSettingsNewIcon from '@material-ui/icons/PowerSettingsNew';
 import People from '@material-ui/icons/People';
+import Ballot from '@material-ui/icons/Ballot';
+
 //routes
 import Dashboards from './Dashboard';
 import Reservation from './Reservation';
@@ -50,6 +52,9 @@ import UserType from './UserType';
 import NewUser from './NewUser';
 import UpdateUser from './UpdateUser';
 import VehicleEdit from './VehicleEdit';
+import UpdateOrder from './UpdateOrder';
+import OrderClient from './OrderClient';
+import ApproveClientOrder from './ApproveClientOrder';
 
 const drawerWidth = 220;
 const drawerHeight = '100vh';
@@ -150,8 +155,8 @@ class App extends Component {
     if ( path === '/admin/' || path === '/admin') {
       nextState.title = 'Dashboard';
     }
-    else if (path.includes('/admin/order/')) {
-      nextState.title = 'Update Order';
+    else if (path.includes('/admin/orders')) {
+      nextState.title = 'Order';
     }
     else if (path.includes('/admin/user/')) {
       nextState.title = 'User';
@@ -159,6 +164,9 @@ class App extends Component {
     else {
       var title = path.replace('/admin/','');
       nextState.title = title.charAt(0).toUpperCase() + title.slice(1);
+    }
+    if (path.includes('/admin/orders/user/')) {
+      nextState.title = 'User Order';
     }
     
   }
@@ -327,6 +335,12 @@ class App extends Component {
                     <ListItemText primary={'Order Detail'} />
                   </ListItem>
                 </Tooltip>
+                <Tooltip title='User Order' placement='right' disableHoverListener={this.state.open}>
+                  <ListItem button key={'user-order'} onClick={()=>{this._toReservation('orders/user')}}>
+                    <ListItemIcon><Ballot /></ListItemIcon>
+                    <ListItemText primary={'User Order'} />
+                  </ListItem>
+                </Tooltip>
                 <Tooltip title='Manage Users' placement='right' disableHoverListener={this.state.open}>
                   <ListItem button key={'users'} onClick={()=>{this._toReservation('users')}}>
                     <ListItemIcon><Face /></ListItemIcon>
@@ -356,11 +370,14 @@ class App extends Component {
               <Route exact path='/admin/Users' component={User}/>
               <Route exact path='/admin/vehicles' component={Vehicle}/>
               <Route exact path='/admin/Orders' component={Order}/>
+              <Route exact path='/admin/Orders/user' component={OrderClient}/>
               <Route exact path='/admin/editformuser' component={EditUserForm}/>
               <Route exact path='/admin/user-type' component={UserType}/>
               <Route exact path='/admin/user/new' component={NewUser}/>
               <Route exact path='/admin/user/update/:id' component={UpdateUser}/>
               <Route exact path='/admin/vehicles/edit/:id' component={VehicleEdit}/>
+              <Route exact path='/admin/orders/edit/:id' component={UpdateOrder}/>
+              <Route exact path='/admin/orders/user/approve/:id' component={ApproveClientOrder}/>
             </Grid>
           </main>
         </div>
