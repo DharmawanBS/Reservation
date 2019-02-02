@@ -60,7 +60,7 @@ class App extends Component {
         vehicle : data[x].vehicle_type + ' ' + data[x].vehicle_number,
         payment : data[x].payment,
         client_phone : data[x].client_phone,
-        price : data[x].price,
+        price : data[x].total,
         notes : data[x].notes  
       })
     }

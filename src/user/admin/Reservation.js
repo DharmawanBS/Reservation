@@ -21,6 +21,12 @@ import List from '@material-ui/core/List';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
 
 //icons
 import SaveIcon from '@material-ui/icons/Save';
@@ -924,7 +930,10 @@ class Reservation extends Component {
 							}
 						</div>
 					</form>
-					{this.snackbars()}
+					{
+						this.snackbars()
+					}
+
 				</Paper>
 			</div>
 		)
