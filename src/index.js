@@ -10,8 +10,8 @@ import { BrowserRouter, Route, Switch} from 'react-router-dom';
 ReactDOM.render(
 <BrowserRouter>
 	<Switch>
-		<Route path = '/user' component={LandingPage}/>
-		<Route path = '/admin' component={App}/>
+		<Route exact path = '/user' component={LandingPage}/>
+		<Route exact path = '/admin' component={App}/>
 		<Route exact path = '/' component={Login}/>
 	</Switch>
 </BrowserRouter>
